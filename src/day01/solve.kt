@@ -1,9 +1,9 @@
-package task01
+package day01
 
 import utils.readInput
 
 fun main() {
-    val lines = readInput("src/task01/input.data").map {Integer.valueOf(it)}
+    val lines = readInput("src/day01/input.data").map {Integer.valueOf(it)}
     val res1 = lines.map { operation(it) }.sum()
     println("sum: $res1")
     val res2 = lines.map { operation2(it) }.sum()
