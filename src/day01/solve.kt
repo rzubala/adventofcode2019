@@ -2,25 +2,21 @@ package day01
 
 import utils.readInput
 
+fun Int.operation() = this.div(3).minus(2)
+
+fun Int.operation2(): Int {
+    val result = this.operation()
+    return if (result <= 0) {
+        0
+    } else {
+        result + result.operation2()
+    }
+}
+
 fun main() {
-    val lines = readInput("src/day01/input.data").map {Integer.valueOf(it)}
-    val res1 = lines.sumBy{ operation(it) }
+    val lines = readInput("src/day01/input.data").map {it.toInt()}
+    val res1 = lines.sumBy{ it.operation() }
     println("sum: $res1")
-    val res2 = lines.sumBy { operation2(it) }
+    val res2 = lines.sumBy { it.operation2() }
     println("sum: $res2")
 }
-
-fun operation2(value: Int): Int {
-    var sum = 0
-    var tmp = value
-    do {
-        tmp = operation(tmp)
-        if (tmp <= 0) {
-            break
-        }
-        sum += tmp
-    } while (true)
-    return sum
-}
-
-inline fun operation(value: Int) = value.div(3).minus(2)

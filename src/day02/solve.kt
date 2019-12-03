@@ -11,8 +11,8 @@ fun main() {
     println("part1: ${calculate(list, 12, 2)}")
 
     //part2
-    for(noun in 0..99) {
-        for(verb in 0..99) {
+    (0..99).forEach { noun ->
+        (0..99).forEach { verb ->
             val list = mutableListOf(*opcodes.toTypedArray())
             val res = calculate(list, noun, verb)
             if (res == part2value) {
@@ -24,12 +24,14 @@ fun main() {
 }
 
 private fun calculate(opcodes: MutableList<Int>, noun: Int, verb: Int): Int {
-    opcodes[1] = noun
-    opcodes[2] = verb
-    for (i in 0..opcodes.size step 4) {
+    opcodes.apply {
+        this[1] = noun
+        this[2] = verb
+    }
+    (0..opcodes.size step 4).forEach { i ->
         val op = opcodes[i]
         if (op == 99) {
-            break
+            return opcodes[0]
         }
         val data1 = opcodes[i + 1]
         val data2 = opcodes[i + 2]
@@ -37,11 +39,8 @@ private fun calculate(opcodes: MutableList<Int>, noun: Int, verb: Int): Int {
         opcodes[dst] = when (op) {
             1 -> opcodes[data1] + opcodes[data2]
             2 -> opcodes[data1] * opcodes[data2]
-            else -> {
-                println("error!")
-                return -1
-            }
+            else -> throw IllegalStateException("Operation not found $dst")
         }
     }
-    return opcodes[0]
+    throw IllegalStateException("Illegal state")
 }
