@@ -1,37 +1,46 @@
 package day04
 
 fun main() {
-    //count(100, 999)
-    count(124075, 580769)
+    count(124075, 580769, false)
+    count(124075, 580769, true)
 }
 
-fun count(from: Int, to: Int) {
-    var sum = 0
-    (from..to).forEach { i ->
-        val nums = i.toString().toCharArray()
-        if (isPassword(nums)) {
-            sum++
-        }
-    }
+fun count(from: Int, to: Int, singlePair: Boolean) {
+    val sum = (from..to).filter { isPassword(it, singlePair) }.count()
     println("sum: $sum")
 }
 
-fun isPassword(nums: CharArray): Boolean {
+fun isPassword(num: Int, singlePair: Boolean): Boolean {
+    val nums = num.toString().toCharArray()
     var last = nums[0].toInt()
-    var pair = false
+    var pairs = mutableMapOf<Int, Int>()
     (1 until nums.size).forEach { n ->
         val num = nums[n].toInt()
         if (num < last) {
             return false
         }
-        if (!pair && num == last) {
-            pair = true
+        if (num == last) {
+            addPair(pairs, num)
         }
         last = num
     }
-    if (pair) {
-        println("${nums.joinToString("")}")
+    if (singlePair) {
+        return pairs.hasSinglePair()
     }
-    return pair
+    return pairs.isNotEmpty()
+}
+
+fun addPair(pairs: MutableMap<Int, Int>, num: Int) {
+    val cnt = pairs[num]
+    pairs[num] = cnt?.plus(1) ?: 2
+}
+
+fun MutableMap<Int, Int>.hasSinglePair(): Boolean {
+    this.values.forEach {
+        if (it == 2) {
+            return true
+        }
+    }
+    return false
 }
 
