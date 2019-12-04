@@ -20,19 +20,20 @@ fun isPassword(num: Int, singlePair: Boolean): Boolean {
             return false
         }
         if (num == last) {
-            addPair(pairs, num)
+            pairs.addPair(num)
         }
         last = num
     }
-    if (singlePair) {
-        return pairs.hasSinglePair()
+    return if (singlePair) {
+        pairs.hasSinglePair()
+    } else {
+        pairs.isNotEmpty()
     }
-    return pairs.isNotEmpty()
 }
 
-fun addPair(pairs: MutableMap<Int, Int>, num: Int) {
-    val cnt = pairs[num]
-    pairs[num] = cnt?.plus(1) ?: 2
+fun MutableMap<Int, Int>.addPair(num: Int) {
+    val cnt = this[num]
+    this[num] = cnt?.plus(1) ?: 2
 }
 
 fun MutableMap<Int, Int>.hasSinglePair(): Boolean {
