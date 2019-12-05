@@ -1,5 +1,6 @@
 package day05
 
+import day02.copy
 import utils.readInput
 
 fun main() {
@@ -81,5 +82,3 @@ fun MutableList<Int>.getData(pointer: Int, mode: Int): Int {
         else -> throw IllegalStateException("Mode $mode not supported")
     }
 }
-
-fun List<Int>.copy(): MutableList<Int> = mutableListOf(*this.toTypedArray())
