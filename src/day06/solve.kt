@@ -1,6 +1,7 @@
 package day06
 
 import utils.readInput
+import java.lang.IllegalStateException
 
 data class Orbit (val name:String, var parent: Orbit? = null)
 
@@ -24,7 +25,10 @@ fun calculateTransfers(orbits: MutableList<Orbit>, name1: String, name2: String)
     parents1?.let {
         parents2?.let {
             val common = parents1.intersect(parents2)
-            val commonOrbit = common.iterator().next()
+            if (common.isEmpty()) {
+                throw IllegalStateException("Common orbits not found")
+            }
+            val commonOrbit = common.first()
             val transfers = parents2.indexOf(commonOrbit).let { result ->
                 parents1.indexOf(commonOrbit).plus(result)
             }
