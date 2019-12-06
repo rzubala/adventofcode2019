@@ -29,9 +29,7 @@ fun calculateTransfers(orbits: MutableList<Orbit>, name1: String, name2: String)
                 throw IllegalStateException("Common orbits not found")
             }
             val commonOrbit = common.first()
-            val transfers = parents2.indexOf(commonOrbit).let { result ->
-                parents1.indexOf(commonOrbit).plus(result)
-            }
+            val transfers = parents1.indexOf(commonOrbit).plus(parents2.indexOf(commonOrbit))
             println("transfers: $transfers")
         }
     }
