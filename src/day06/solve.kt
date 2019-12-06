@@ -21,11 +21,38 @@ fun main() {
         child.parent = parent
     }
     println("orbits: ${orbits.sumBy { it.countParents() }}")
+
+    calculateTransfers(orbits, "YOU", "SAN")
+}
+
+fun calculateTransfers(orbits: MutableList<Orbit>, name1: String, name2: String) {
+    val p1 = orbits.find { it.name == name1 }
+    val p2 = orbits.find { it.name == name2 }
+    val parents1 = p1?.getParents()
+    val parents2 = p2?.getParents()
+    val common = parents1?.intersect(parents2!!)
+    val commonOrbit = common?.iterator()?.next()
+    commonOrbit?.let {
+        println("transfers: ${parents2?.indexOf(commonOrbit)?.let {result ->
+            parents1.indexOf(commonOrbit).plus(result)
+        }
+        }")
+    }
+}
+
+fun Orbit.getParents(): List<String> {
+    val parents: MutableList<String> = mutableListOf()
+    var parent = parent
+    while (parent != null) {
+        parents.add(parent.name)
+        parent = parent.parent
+    }
+    return parents
 }
 
 fun Orbit.countParents(): Int {
     if (parent == null) {
         return 0
     }
-    return 1 + parent!!.countParents();
+    return 1 + parent!!.countParents()
 }
