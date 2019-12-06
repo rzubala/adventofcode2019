@@ -43,14 +43,14 @@ fun Orbit.getParents(): List<String> {
 
 fun Orbit.fillParents(list: MutableList<String>) {
     parent?.let {
-        list.add(parent!!.name)
-        parent!!.fillParents(list)
+        list.add(it.name)
+        it.fillParents(list)
     }
 }
 
 fun Orbit.countParents(): Int {
     parent?.let {
-        return parent!!.countParents().plus(1)
+        return it.countParents().plus(1)
     }
     return 0
 }
