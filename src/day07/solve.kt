@@ -5,21 +5,23 @@ import day05.IntInput
 import day05.IntOutput
 import day05.intCode
 import utils.readInput
-import java.lang.IllegalStateException
+import kotlin.concurrent.thread
 
 fun main() {
     val opcodes = readInput("src/day07/input.data")[0].split(",").map { it.toInt() }
-    part1(opcodes)
+    generate(opcodes, 0..4)
+    generate(opcodes, 5..9)
 }
 
-class DataInput : IntInput {
+class DataInput(private val lock: Object) : IntInput {
     private var list: MutableList<Int> = mutableListOf()
-    fun add(value: Int) {
+    fun add(value: Int) = synchronized(lock) {
         list.add(value)
+        lock.notifyAll()
     }
-    override fun get(): Int {
-        if (list.isEmpty()) {
-            throw IllegalStateException("Empty list")
+    override fun get(): Int = synchronized(lock) {
+        while (list.isEmpty()) {
+            lock.wait()
         }
         return list.removeAt(0)
     }
@@ -37,27 +39,20 @@ class Amplifier(private val code: MutableList<Int>, private val dataInput: DataI
     }
 }
 
-private fun part1(opcodes: List<Int>) {
+private fun generate(opcodes: List<Int>, range: IntRange) {
     var max = Integer.MIN_VALUE
-
-    permute((0..4).toList()).forEach { 
-        val in0 = DataInput().apply { add(it[0]); add(0) }
-        val in1 = DataInput().apply { add(it[1]) }
-        val in2 = DataInput().apply { add(it[2]) }
-        val in3 = DataInput().apply { add(it[3]) }
-        val in4 = DataInput().apply { add(it[4]) }
+    permute(range.toList()).forEach {
+        val in0 = DataInput(Object()).apply { add(it[0]); add(0) }
+        val in1 = DataInput(Object()).apply { add(it[1]) }
+        val in2 = DataInput(Object()).apply { add(it[2]) }
+        val in3 = DataInput(Object()).apply { add(it[3]) }
+        val in4 = DataInput(Object()).apply { add(it[4]) }
 
         val out0 = DataOutput(in1)
         val out1 = DataOutput(in2)
         val out2 = DataOutput(in3)
         val out3 = DataOutput(in4)
-        val out4 = object : IntOutput {
-            override fun handle(out: Int) {
-                if (out > max) {
-                    max = out
-                }
-            }
-        }
+        val out4 = DataOutput(in0)
 
         val amp0 = Amplifier(opcodes.copy(), in0, out0)
         val amp1 = Amplifier(opcodes.copy(), in1, out1)
@@ -65,11 +60,24 @@ private fun part1(opcodes: List<Int>) {
         val amp3 = Amplifier(opcodes.copy(), in3, out3)
         val amp4 = Amplifier(opcodes.copy(), in4, out4)
 
-        amp0.start()
-        amp1.start()
-        amp2.start()
-        amp3.start()
-        amp4.start()
+        thread(start = true) {
+            amp0.start()
+        }
+        thread(start = true) {
+            amp1.start()
+        }
+        thread(start = true) {
+            amp2.start()
+        }
+        thread(start = true) {
+            amp3.start()
+        }
+        thread(start = true) {
+            val output = amp4.start()
+            if (output > max) {
+                max = output
+            }
+        }
     }
     println("max: $max")
 }
