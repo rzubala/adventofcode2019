@@ -5,13 +5,31 @@ import utils.readInput
 
 fun main() {
     val opcodes = readInput("src/day05/input.data")[0].split(",").map { it.toInt() }
-    println("${intCode(opcodes.copy(), listOf(1))}")
-    println("${intCode(opcodes.copy(), listOf(5))}")
+    val output = object : IntOutput {
+        override fun handle(out: Int) {
+            //println("out> $out")
+        }
+    }
+    println("${intCode(opcodes.copy(), DataInput(1), output)}")
+    println("${intCode(opcodes.copy(), DataInput(5), output)}")
 }
 
-fun intCode(opcodes: MutableList<Int>, input: List<Int>): Int {
+interface IntOutput {
+    fun handle(out: Int)
+}
+
+class DataInput(private val i: Int): IntInput {
+    override fun get(): Int {
+        return i
+    }
+}
+
+interface IntInput {
+    fun get(): Int
+}
+
+fun intCode(opcodes: MutableList<Int>, input: IntInput, intout: IntOutput): Int {
     var i = 0
-    var inputCnt = 0
     var output = 0
     while (i < opcodes.size) {
         val instruction = opcodes[i].toString().padStart(5, '0')
@@ -31,12 +49,12 @@ fun intCode(opcodes: MutableList<Int>, input: List<Int>): Int {
             }
             3 -> {
                 val dst = opcodes[i + 1]
-                opcodes[dst] = input[inputCnt++]
+                opcodes[dst] = input.get()
                 i += 2
             }
             4 -> {
                 output = opcodes.getData(i + 1, mode1)
-                //println("out> $output")
+                intout.handle(output)
                 i += 2
             }
             5 -> {
