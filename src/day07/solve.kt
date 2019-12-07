@@ -5,7 +5,9 @@ import day05.IntInput
 import day05.IntOutput
 import day05.intCode
 import utils.readInput
+import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
+import kotlin.concurrent.withLock
 
 fun main() {
     val opcodes = readInput("src/day07/input.data")[0].split(",").map { it.toInt() }
@@ -14,15 +16,16 @@ fun main() {
 }
 
 class DataInput : IntInput {
-    private var lock = Object()
+    private val lock = ReentrantLock()
+    private val condition = lock.newCondition()
     private var list: MutableList<Int> = mutableListOf()
-    fun add(value: Int) = synchronized(lock) {
+    fun add(value: Int) = lock.withLock {
         list.add(value)
-        lock.notifyAll()
+        condition.signalAll()
     }
-    override fun get(): Int = synchronized(lock) {
+    override fun get(): Int = lock.withLock {
         while (list.isEmpty()) {
-            lock.wait()
+            condition.await()
         }
         return list.removeAt(0)
     }
