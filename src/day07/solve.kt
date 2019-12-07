@@ -13,7 +13,8 @@ fun main() {
     generate(opcodes, 5..9)
 }
 
-class DataInput(private val lock: Object) : IntInput {
+class DataInput : IntInput {
+    private var lock = Object()
     private var list: MutableList<Int> = mutableListOf()
     fun add(value: Int) = synchronized(lock) {
         list.add(value)
@@ -42,11 +43,11 @@ class Amplifier(private val code: MutableList<Int>, private val dataInput: DataI
 private fun generate(opcodes: List<Int>, range: IntRange) {
     var max = Integer.MIN_VALUE
     permute(range.toList()).forEach {
-        val in0 = DataInput(Object()).apply { add(it[0]); add(0) }
-        val in1 = DataInput(Object()).apply { add(it[1]) }
-        val in2 = DataInput(Object()).apply { add(it[2]) }
-        val in3 = DataInput(Object()).apply { add(it[3]) }
-        val in4 = DataInput(Object()).apply { add(it[4]) }
+        val in0 = DataInput().apply { add(it[0]); add(0) }
+        val in1 = DataInput().apply { add(it[1]) }
+        val in2 = DataInput().apply { add(it[2]) }
+        val in3 = DataInput().apply { add(it[3]) }
+        val in4 = DataInput().apply { add(it[4]) }
 
         val out0 = DataOutput(in1)
         val out1 = DataOutput(in2)
