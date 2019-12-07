@@ -6,11 +6,28 @@ import utils.readInput
 
 fun main() {
     val opcodes = readInput("src/day07/input.data")[0].split(",").map { it.toInt() }
+    part1(opcodes)
+}
 
+private fun part1(opcodes: List<Int>) {
     var max = Integer.MIN_VALUE
-    var maxPhases = ""
     val phases = (0..4)
+    generatePhases(phases).forEach { it ->
+        var output = 0
+        output = intCode(opcodes.copy(), listOf(it[0], output))
+        output = intCode(opcodes.copy(), listOf(it[1], output))
+        output = intCode(opcodes.copy(), listOf(it[2], output))
+        output = intCode(opcodes.copy(), listOf(it[3], output))
+        output = intCode(opcodes.copy(), listOf(it[4], output))
+        if (output > max) {
+            max = output
+        }
+    }
+    println("max: $max")
+}
 
+fun generatePhases(phases: IntRange): List<IntArray> {
+    val result = mutableListOf<IntArray>()
     for (p0 in phases) {
         for (p1 in phases) {
             if (p1 == p0) {
@@ -28,21 +45,11 @@ fun main() {
                         if (p4 == p3 || p4 == p2 || p4 == p1 || p4 == p0) {
                             continue
                         }
-                        var output = 0
-                        output = intCode(opcodes.copy(), listOf(p0, output))
-                        output = intCode(opcodes.copy(), listOf(p1, output))
-                        output = intCode(opcodes.copy(), listOf(p2, output))
-                        output = intCode(opcodes.copy(), listOf(p3, output))
-                        output = intCode(opcodes.copy(), listOf(p4, output))
-                        if (output > max) {
-                            max = output
-                            maxPhases = "$p0$p1$p2$p3$p4"
-                        }
+                        result.add(intArrayOf(p0, p1, p2, p3 ,p4))
                     }
                 }
             }
         }
     }
-
-    println("max: $max $maxPhases")
+    return result
 }
