@@ -11,8 +11,7 @@ fun main() {
 
 private fun part1(opcodes: List<Int>) {
     var max = Integer.MIN_VALUE
-    val phases = (0..4)
-    generatePhases(phases).forEach { it ->
+    permute((0..4).toList()).forEach { it ->
         var output = 0
         output = intCode(opcodes.copy(), listOf(it[0], output))
         output = intCode(opcodes.copy(), listOf(it[1], output))
@@ -26,30 +25,17 @@ private fun part1(opcodes: List<Int>) {
     println("max: $max")
 }
 
-fun generatePhases(phases: IntRange): List<IntArray> {
-    val result = mutableListOf<IntArray>()
-    for (p0 in phases) {
-        for (p1 in phases) {
-            if (p1 == p0) {
-                continue
-            }
-            for (p2 in phases) {
-                if (p2 == p1 || p2 == p0) {
-                    continue
-                }
-                for (p3 in phases) {
-                    if (p3 == p2 || p3 == p1 || p3 == p0) {
-                        continue
-                    }
-                    for (p4 in phases) {
-                        if (p4 == p3 || p4 == p2 || p4 == p1 || p4 == p0) {
-                            continue
-                        }
-                        result.add(intArrayOf(p0, p1, p2, p3 ,p4))
-                    }
-                }
-            }
-        }
+fun permute(list: List<Int>): List<List<Int>> {
+    if (list.size == 1) {
+        return listOf(list)
     }
-    return result
+    val permutations = mutableListOf<List<Int>>()
+    val first = list.first()
+    for (sublist in permute(list.drop(1)))
+        for (i in 0..sublist.size) {
+            val newPerm = sublist.toMutableList()
+            newPerm.add(i, first)
+            permutations.add(newPerm)
+        }
+    return permutations
 }
