@@ -5,12 +5,14 @@ import utils.readInput
 
 fun main() {
     val opcodes = readInput("src/day05/input.data")[0].split(",").map { it.toInt() }
-    process(opcodes.copy(), "1")
-    process(opcodes.copy(), "5")
+    println("${intCode(opcodes.copy(), listOf(1))}")
+    println("${intCode(opcodes.copy(), listOf(5))}")
 }
 
-private fun process(opcodes: MutableList<Int>, input: String) {
+fun intCode(opcodes: MutableList<Int>, input: List<Int>): Int {
     var i = 0
+    var inputCnt = 0
+    var output = 0
     while (i < opcodes.size) {
         val instruction = opcodes[i].toString().padStart(5, '0')
         val op = "${instruction[3]}${instruction[4]}".toInt()
@@ -29,11 +31,12 @@ private fun process(opcodes: MutableList<Int>, input: String) {
             }
             3 -> {
                 val dst = opcodes[i + 1]
-                opcodes[dst] = input.toInt()
+                opcodes[dst] = input[inputCnt++]
                 i += 2
             }
             4 -> {
-                println("out> ${opcodes.getData(i + 1, mode1)}")
+                output = opcodes.getData(i + 1, mode1)
+                //println("out> $output")
                 i += 2
             }
             5 -> {
@@ -68,7 +71,7 @@ private fun process(opcodes: MutableList<Int>, input: String) {
                 }
                 i += 4
             }
-            99 -> return
+            99 -> return output
             else -> throw IllegalStateException("Operation not found $op")
         }
     }
