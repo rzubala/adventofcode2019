@@ -8,6 +8,8 @@ fun main() = runBlocking {
         repeat(5) { println(receive()) }
     }
 
+    Thread.sleep(2000)
+
     launch {
         // this might be heavy CPU-consuming computation or async logic, we'll just send five squares
         for (x in 1..5) {
