@@ -5,17 +5,8 @@ import utils.readInput
 
 fun main() {
     val opcodes = readInput("src/day05/input.data")[0].split(",").map { it.toInt() }
-    val output = object : IntOutput {
-        override fun handle(out: Int) {
-            //println("out> $out")
-        }
-    }
-    println("${intCode(opcodes.copy(), DataInput(1), output)}")
-    println("${intCode(opcodes.copy(), DataInput(5), output)}")
-}
-
-interface IntOutput {
-    fun handle(out: Int)
+    println("${intCode(opcodes.copy(), DataInput(1)) {} }")
+    println("${intCode(opcodes.copy(), DataInput(5)) {} }")
 }
 
 class DataInput(private val i: Int): IntInput {
@@ -28,7 +19,7 @@ interface IntInput {
     fun get(): Int
 }
 
-fun intCode(opcodes: MutableList<Int>, input: IntInput, intout: IntOutput): Int {
+fun intCode(opcodes: MutableList<Int>, input: IntInput, intout: (value: Int) -> Unit): Int {
     var i = 0
     var output = 0
     while (i < opcodes.size) {
@@ -54,7 +45,7 @@ fun intCode(opcodes: MutableList<Int>, input: IntInput, intout: IntOutput): Int 
             }
             4 -> {
                 output = opcodes.getData(i + 1, mode1)
-                intout.handle(output)
+                intout(output)
                 i += 2
             }
             5 -> {
