@@ -14,20 +14,18 @@ fun main() {
     merge(layers).print()
 }
 
-fun createLayers(data: List<Int>): List<List<List<Int>>> {
-    var index = 0
-    val layers: MutableList<MutableList<List<Int>>> = mutableListOf()
-    val numLayers = data.size.div(width).div(height)
-    (0 until numLayers).forEach { _ ->
-        val layer: MutableList<List<Int>> = mutableListOf()
-        (0 until height).forEach { _ ->
-            val row = data.subList(index, index + width)
-            layer.add(row)
-            index += width
+fun count(layers: List<List<List<Int>>>) {
+    var minZero = Int.MAX_VALUE
+    var result = 0
+    layers.indices.forEach { l ->
+        val layer = layers[l]
+        val zeros = layer.getDigitCount(0)
+        if (zeros < minZero) {
+            minZero = zeros
+            result = layer.getDigitCount(1) * layer.getDigitCount(2)
         }
-        layers.add(layer)
     }
-    return layers
+    println("part1: $result")
 }
 
 fun merge(layers: List<List<List<Int>>>): List<List<Int>> {
@@ -44,20 +42,6 @@ fun merge(layers: List<List<List<Int>>>): List<List<Int>> {
         }
     }
     return image
-}
-
-fun count(layers: List<List<List<Int>>>) {
-    var minZero = Int.MAX_VALUE
-    var result = 0
-    layers.indices.forEach { l ->
-        val layer = layers[l]
-        val zeros = layer.getDigitCount(0)
-        if (zeros < minZero) {
-            minZero = zeros
-            result = layer.getDigitCount(1) * layer.getDigitCount(2)
-        }
-    }
-    println("part1: $result")
 }
 
 fun List<List<Int>>.print() {
@@ -91,4 +75,20 @@ fun fillTransparentImage(): MutableList<MutableList<Int>> {
         image.add(row)
     }
     return image
+}
+
+fun createLayers(data: List<Int>): List<List<List<Int>>> {
+    var index = 0
+    val layers: MutableList<MutableList<List<Int>>> = mutableListOf()
+    val numLayers = data.size.div(width).div(height)
+    (0 until numLayers).forEach { _ ->
+        val layer: MutableList<List<Int>> = mutableListOf()
+        (0 until height).forEach { _ ->
+            val row = data.subList(index, index + width)
+            layer.add(row)
+            index += width
+        }
+        layers.add(layer)
+    }
+    return layers
 }
