@@ -1,7 +1,6 @@
 package day07
 
 import day02.copy
-import day05.IntInput
 import day05.intCode
 import utils.readInput
 import java.util.concurrent.locks.ReentrantLock
@@ -14,7 +13,7 @@ fun main() {
     generate(opcodes, 5..9)
 }
 
-class DataInput : IntInput {
+class DataInput {
     private val lock = ReentrantLock()
     private val condition = lock.newCondition()
     private var list: MutableList<Int> = mutableListOf()
@@ -22,7 +21,7 @@ class DataInput : IntInput {
         list.add(value)
         condition.signalAll()
     }
-    override fun get(): Int = lock.withLock {
+    fun get(): Int = lock.withLock {
         while (list.isEmpty()) {
             condition.await()
         }
@@ -38,7 +37,7 @@ class DataOutput(private val input: DataInput) {
 
 class Amplifier(private val code: MutableList<Int>, private val dataInput: DataInput, private val dataOutput: DataOutput) {
     fun start(): Int {
-        return intCode(code, dataInput) { value -> dataOutput.handle(value)}
+        return intCode(code, {dataInput.get()}) { value -> dataOutput.handle(value)}
     }
 }
 
