@@ -9,6 +9,12 @@ const val transparent = 2
 
 fun main() {
     val data = readInput("src/day08/input.data")[0].toCharArray().map { it.toString().toInt() }
+    val layers: List<List<List<Int>>> = createLayers(data)
+    count(layers)
+    merge(layers).print()
+}
+
+fun createLayers(data: List<Int>): List<List<List<Int>>> {
     var index = 0
     val layers: MutableList<MutableList<List<Int>>> = mutableListOf()
     val numLayers = data.size.div(width).div(height)
@@ -21,8 +27,7 @@ fun main() {
         }
         layers.add(layer)
     }
-    count(layers)
-    merge(layers).print()
+    return layers
 }
 
 fun merge(layers: List<List<List<Int>>>): List<List<Int>> {
