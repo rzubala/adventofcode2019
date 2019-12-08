@@ -5,7 +5,6 @@ import utils.readInput
 const val width = 25
 const val height = 6
 const val black = 0
-const val white = 1
 const val transparent = 2
 
 fun main() {
@@ -15,7 +14,7 @@ fun main() {
     val numLayers = data.size.div(width).div(height)
     (0 until numLayers).forEach { _ ->
         val layer: MutableList<List<Int>> = mutableListOf()
-        (0 until height).forEach { j ->
+        (0 until height).forEach { _ ->
             val row = data.subList(index, index + width)
             layer.add(row)
             index += width
@@ -23,36 +22,15 @@ fun main() {
         layers.add(layer)
     }
     count(layers)
-    val image = merge(layers)
-    printImage(image)
+    merge(layers).print()
 }
 
-fun printImage(image: List<List<Int>>) {
-    (0 until height).forEach { r ->
-        (0 until width).forEach { c ->
-            if (image[r][c] == black) {
-                print(" ")
-            } else {
-                print(".")
-            }
-        }
-        println()
-    }
-}
-
-fun merge(layers: MutableList<MutableList<List<Int>>>): List<List<Int>> {
-    val image: MutableList<MutableList<Int>> = mutableListOf()
-    repeat(height) {
-        val row = mutableListOf<Int>()
-        repeat(width) {
-            row.add(transparent)
-        }
-        image.add(row)
-    }
+fun merge(layers: List<List<List<Int>>>): List<List<Int>> {
+    val image: MutableList<MutableList<Int>> = fillTransparentImage()
     layers.indices.forEach { l->
         val layer = layers[l]
-        (0 until height).forEach { r ->
-            (0 until width).forEach { c ->
+        layer.indices.forEach { r ->
+            layer[r].indices.forEach { c ->
                 val pixel = image[r][c]
                 if (pixel == transparent) {
                     image[r][c] = layer[r][c]
@@ -68,19 +46,44 @@ fun count(layers: List<List<List<Int>>>) {
     var result = 0
     layers.indices.forEach { l ->
         val layer = layers[l]
-        val zeros = getDigitCount(layer, 0)
+        val zeros = layer.getDigitCount(0)
         if (zeros < minZero) {
             minZero = zeros
-            result = getDigitCount(layer, 1) * getDigitCount(layer, 2)
+            result = layer.getDigitCount(1) * layer.getDigitCount(2)
         }
     }
     println("part1: $result")
 }
 
-fun getDigitCount(layer: List<List<Int>>, d: Int): Int {
+fun List<List<Int>>.print() {
+    this.indices.forEach { r ->
+        this[r].indices.forEach { c ->
+            print(if (this[r][c] == black) {
+                " "
+            } else {
+                "."
+            })
+        }
+        println()
+    }
+}
+
+fun List<List<Int>>.getDigitCount(d: Int): Int {
     var cnt = 0
-    (0 until height).forEach {r ->
-        cnt += layer[r].count { it == d }
+    this.indices.forEach {r ->
+        cnt += this[r].count { it == d }
     }
     return cnt
+}
+
+fun fillTransparentImage(): MutableList<MutableList<Int>> {
+    val image: MutableList<MutableList<Int>> = mutableListOf()
+    repeat(height) {
+        val row = mutableListOf<Int>()
+        repeat(width) {
+            row.add(transparent)
+        }
+        image.add(row)
+    }
+    return image
 }
