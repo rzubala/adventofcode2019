@@ -1,6 +1,6 @@
 package day07
 
-import day02.copy
+import day05.copy
 import day05.intCode
 import utils.readInput
 import java.util.concurrent.locks.ReentrantLock
@@ -8,20 +8,20 @@ import kotlin.concurrent.thread
 import kotlin.concurrent.withLock
 
 fun main() {
-    val opcodes = readInput("src/day07/input.data")[0].split(",").map { it.toInt() }
-    generate(opcodes, 0..4)
-    generate(opcodes, 5..9)
+    val opcodes = readInput("src/day07/input.data")[0].split(",").map { it.toLong() }
+    generate(opcodes, 0L..4L)
+    generate(opcodes, 5L..9L)
 }
 
 class DataInput {
     private val lock = ReentrantLock()
     private val condition = lock.newCondition()
-    private var list: MutableList<Int> = mutableListOf()
-    fun add(value: Int) = lock.withLock {
+    private var list: MutableList<Long> = mutableListOf()
+    fun add(value: Long) = lock.withLock {
         list.add(value)
         condition.signalAll()
     }
-    fun get(): Int = lock.withLock {
+    fun get(): Long = lock.withLock {
         while (list.isEmpty()) {
             condition.await()
         }
@@ -30,19 +30,19 @@ class DataInput {
 }
 
 class DataOutput(private val input: DataInput) {
-    fun handle(out: Int) {
+    fun handle(out: Long) {
         input.add(out)
     }
 }
 
-class Amplifier(private val code: MutableList<Int>, private val dataInput: DataInput, private val dataOutput: DataOutput) {
-    fun start(): Int {
+class Amplifier(private val code: MutableList<Long>, private val dataInput: DataInput, private val dataOutput: DataOutput) {
+    fun start(): Long {
         return intCode(code, {dataInput.get()}) { value -> dataOutput.handle(value)}
     }
 }
 
-private fun generate(opcodes: List<Int>, range: IntRange) {
-    var max = Integer.MIN_VALUE
+private fun generate(opcodes: List<Long>, range: LongRange) {
+    var max = Long.MIN_VALUE
     permute(range.toList()).forEach {
         val in0 = DataInput().apply { add(it[0]); add(0) }
         val in1 = DataInput().apply { add(it[1]) }
@@ -84,11 +84,11 @@ private fun generate(opcodes: List<Int>, range: IntRange) {
     println("max: $max")
 }
 
-fun permute(list: List<Int>): List<List<Int>> {
+fun permute(list: List<Long>): List<List<Long>> {
     if (list.size == 1) {
         return listOf(list)
     }
-    val permutations = mutableListOf<List<Int>>()
+    val permutations = mutableListOf<List<Long>>()
     val first = list.first()
     for (sublist in permute(list.drop(1)))
         for (i in 0..sublist.size) {

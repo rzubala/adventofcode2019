@@ -4,17 +4,17 @@ import utils.readInput
 
 const val part2value = 19690720
 
-fun List<Int>.copy(): MutableList<Int> = mutableListOf(*this.toTypedArray())
+fun List<Int>.copyInt(): MutableList<Int> = mutableListOf(*this.toTypedArray())
 
 fun main() {
     val opcodes = readInput("src/day02/input.data")[0].split(",").map { it.toInt() }
     //part1
-    println("part1: ${calculate(opcodes.copy(), 12, 2)}")
+    println("part1: ${calculate(opcodes.copyInt(), 12, 2)}")
 
     //part2
     (0..99).forEach { noun ->
         (0..99).forEach { verb ->
-            val res = calculate(opcodes.copy(), noun, verb)
+            val res = calculate(opcodes.copyInt(), noun, verb)
             if (res == part2value) {
                 println("part2: ${noun * 100 + verb}")
                 return
