@@ -45,23 +45,23 @@ fun destroyOrder(point: Point, data: List<Point>) {
             map.add(angle, point, other)
         }
     }
-    val flatList = toFlat(map)
+    val flatList = map.toFlat()
     println("200th: ${flatList[index]} ${flatList[index].x*100 + flatList[index].y}")
 }
 
-fun toFlat(map: Map<Double, MutableList<Point>>): List<Point> {
+fun Map<Double, MutableList<Point>>.toFlat(): List<Point> {
     val result: MutableList<Point>  = mutableListOf()
-    val keys = map.toSortedMap().keys
+    val keys = toSortedMap().keys
     var empty = false
     while (!empty) {
         empty = true
         keys.forEach{ k ->
-            val list = map[k]
+            val list = this[k]
             list?.let{
-                if (it.size > 0) {
+                if (it.isNotEmpty()) {
                     result.add(it.removeAt(0))
                 }
-                if (it.size > 0) {
+                if (it.isNotEmpty()) {
                     empty = false
                 }
             }

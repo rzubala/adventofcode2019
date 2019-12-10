@@ -1,7 +1,7 @@
 package day07
 
-import day05.copy
-import day05.intCode
+import utils.copy
+import utils.intCode
 import utils.readInput
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
@@ -29,39 +29,25 @@ class DataInput {
     }
 }
 
-class DataOutput(private val input: DataInput) {
-    fun handle(out: Long) {
-        input.add(out)
-    }
-}
-
-class Amplifier(private val code: MutableList<Long>, private val dataInput: DataInput, private val dataOutput: DataOutput) {
+class Amplifier(private val code: MutableList<Long>, private val dataInput: DataInput, private val pipeTo: DataInput) {
     fun start(): Long {
-        return intCode(code, {dataInput.get()}) { value -> dataOutput.handle(value)}
+        return intCode(code, {dataInput.get()}) { out -> pipeTo.add(out)}
     }
 }
 
 private fun generate(opcodes: List<Long>, range: LongRange) {
     var max = Long.MIN_VALUE
-    permute(range.toList()).forEach {
+    range.toList().permute().forEach {
         val in0 = DataInput().apply { add(it[0]); add(0) }
         val in1 = DataInput().apply { add(it[1]) }
         val in2 = DataInput().apply { add(it[2]) }
         val in3 = DataInput().apply { add(it[3]) }
         val in4 = DataInput().apply { add(it[4]) }
-
-        val out0 = DataOutput(in1)
-        val out1 = DataOutput(in2)
-        val out2 = DataOutput(in3)
-        val out3 = DataOutput(in4)
-        val out4 = DataOutput(in0)
-
-        val amp0 = Amplifier(opcodes.copy(), in0, out0)
-        val amp1 = Amplifier(opcodes.copy(), in1, out1)
-        val amp2 = Amplifier(opcodes.copy(), in2, out2)
-        val amp3 = Amplifier(opcodes.copy(), in3, out3)
-        val amp4 = Amplifier(opcodes.copy(), in4, out4)
-
+        val amp0 = Amplifier(opcodes.copy(), in0, in1)
+        val amp1 = Amplifier(opcodes.copy(), in1, in2)
+        val amp2 = Amplifier(opcodes.copy(), in2, in3)
+        val amp3 = Amplifier(opcodes.copy(), in3, in4)
+        val amp4 = Amplifier(opcodes.copy(), in4, in0)
         thread(start = true) {
             amp0.start()
         }
@@ -84,13 +70,13 @@ private fun generate(opcodes: List<Long>, range: LongRange) {
     println("max: $max")
 }
 
-fun permute(list: List<Long>): List<List<Long>> {
-    if (list.size == 1) {
-        return listOf(list)
+fun List<Long>.permute(): List<List<Long>> {
+    if (size == 1) {
+        return listOf(this)
     }
     val permutations = mutableListOf<List<Long>>()
-    val first = list.first()
-    for (sublist in permute(list.drop(1)))
+    val first = first()
+    for (sublist in drop(1).permute())
         for (i in 0..sublist.size) {
             val newPerm = sublist.toMutableList()
             newPerm.add(i, first)

@@ -1,7 +1,7 @@
 package day09
 
-import day05.copy
-import day05.intCode
+import utils.copy
+import utils.intCode
 import utils.readInput
 
 fun main() {
