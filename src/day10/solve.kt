@@ -2,21 +2,23 @@ package day10
 
 import utils.readInput
 import java.lang.Math.PI
+import kotlin.math.abs
 
 data class Point(val x: Int, val y: Int)
+
+const val index = 200.minus(1)
 
 fun main() {
     val map: MutableList<List<Char>> = mutableListOf()
     readInput("src/day10/input.data").forEach { r ->
-        val row = mutableListOf<Char>().apply { addAll(r.toCharArray().toList() ) }
-        map.add(row)
+        map.add(mutableListOf<Char>().apply { addAll(r.toCharArray().toList() ) })
     }
-    map.print()
     val data: List<Point> = map.toData()
-    findAsteoroids(data)
+    val point = findAsteroid(data)
+    destroyOrder(point, data)
 }
 
-fun findAsteoroids(data: List<Point>) {
+fun findAsteroid(data: List<Point>): Point {
     var max = Int.MIN_VALUE
     var p: Point? = null
     data.forEach { p1 ->
@@ -32,6 +34,55 @@ fun findAsteoroids(data: List<Point>) {
         }
     }
     println("$p $max")
+    return p!!
+}
+
+fun destroyOrder(point: Point, data: List<Point>) {
+    val map: MutableMap<Double, MutableList<Point>> = mutableMapOf()
+    data.forEach { other ->
+        if (other != point) {
+            val angle = point.angle(other)
+            map.add(angle, point, other)
+        }
+    }
+    val flatList = toFlat(map)
+    println("200th: ${flatList[index]} ${flatList[index].x*100 + flatList[index].y}")
+}
+
+fun toFlat(map: Map<Double, MutableList<Point>>): List<Point> {
+    val result: MutableList<Point>  = mutableListOf()
+    val keys = map.toSortedMap().keys
+    var empty = false
+    while (!empty) {
+        empty = true
+        keys.forEach{ k ->
+            val list = map[k]
+            list?.let{
+                if (it.size > 0) {
+                    result.add(it.removeAt(0))
+                }
+                if (it.size > 0) {
+                    empty = false
+                }
+            }
+        }
+    }
+    return result
+}
+
+fun MutableMap<Double, MutableList<Point>>.add(angle: Double, source: Point, point: Point) {
+    val list: MutableList<Point>? = get(angle)
+    list?.let {
+        list.add(point)
+        list.sortBy { source.dist(it) }
+        return
+    }
+    this[angle] = mutableListOf(point)
+}
+
+
+fun Point.dist(other: Point): Int {
+    return abs(other.x - x) + abs(other.y - y)
 }
 
 fun List<List<Char>>.toData(): List<Point> {
@@ -47,19 +98,14 @@ fun List<List<Char>>.toData(): List<Point> {
     return result
 }
 
-fun List<List<Char>>.print() {
-    this.forEach {row ->
-        row.forEach{
-            print(it)
-        }
-        println()
-    }
-}
-
 fun Point.angle(p: Point): Double {
     return getAngle(x, y, p.x, p.y)
 }
 
 fun getAngle(x1: Int, y1: Int, x2: Int, y2: Int): Double {
-    return kotlin.math.atan2((y2 - y1).toDouble(), (x2 - x1).toDouble()) * 180 / PI
+    var angle = kotlin.math.atan2((y2 - y1).toDouble(), (x2 - x1).toDouble()) * 180 / PI + 90
+    if (angle < 0) {
+        angle += 360
+    }
+    return angle
 }
