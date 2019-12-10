@@ -1,7 +1,7 @@
 package day07
 
+import utils.IntCode
 import utils.copy
-import utils.intCode
 import utils.readInput
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
@@ -29,9 +29,9 @@ class DataInput {
     }
 }
 
-class Amplifier(private val code: MutableList<Long>, private val dataInput: DataInput, private val pipeTo: DataInput) {
+class Amplifier(private val code: List<Long>, private val dataInput: DataInput, private val pipeTo: DataInput) {
     fun start(): Long {
-        return intCode(code, {dataInput.get()}) { out -> pipeTo.add(out)}
+        return IntCode(code.copy()).run({dataInput.get()}) { out -> pipeTo.add(out)}
     }
 }
 
@@ -43,25 +43,20 @@ private fun generate(opcodes: List<Long>, range: LongRange) {
         val in2 = DataInput().apply { add(it[2]) }
         val in3 = DataInput().apply { add(it[3]) }
         val in4 = DataInput().apply { add(it[4]) }
-        val amp0 = Amplifier(opcodes.copy(), in0, in1)
-        val amp1 = Amplifier(opcodes.copy(), in1, in2)
-        val amp2 = Amplifier(opcodes.copy(), in2, in3)
-        val amp3 = Amplifier(opcodes.copy(), in3, in4)
-        val amp4 = Amplifier(opcodes.copy(), in4, in0)
         thread(start = true) {
-            amp0.start()
+            Amplifier(opcodes, in0, in1).start()
         }
         thread(start = true) {
-            amp1.start()
+            Amplifier(opcodes, in1, in2).start()
         }
         thread(start = true) {
-            amp2.start()
+            Amplifier(opcodes, in2, in3).start()
         }
         thread(start = true) {
-            amp3.start()
+            Amplifier(opcodes, in3, in4).start()
         }
         thread(start = true) {
-            val output = amp4.start()
+            val output = Amplifier(opcodes, in4, in0).start()
             if (output > max) {
                 max = output
             }
