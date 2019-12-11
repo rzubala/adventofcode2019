@@ -4,7 +4,7 @@ import utils.readInput
 import java.lang.Math.PI
 import kotlin.math.abs
 
-data class Point(val x: Int, val y: Int)
+data class Point(var x: Int, var y: Int)
 
 const val index = 200.minus(1)
 
