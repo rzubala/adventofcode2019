@@ -1,6 +1,7 @@
 package day11
 
 import day10.Point
+import kotlinx.coroutines.yield
 import utils.IntCode
 import utils.copy
 import utils.readInput
@@ -25,19 +26,21 @@ fun main() {
             return IntCode(code.copy()).run({ points.getColor(position) }) { out ->
                 if (directionOutput) {
                     dir = dir.turn(out, position)
-                    //println("$out: $dir $position ${points.size}")
                 } else {
                     points[position.copy()] = out
-                    //println("$out: $position")
                 }
-
                 directionOutput = !directionOutput
             }
         }
     }
 
     HullRobot(opcodes.copy()).start()
-    println("Painted ${points.size}")
+    println("Part 1: painted ${points.size}")
+
+    points.clear()
+    points[Point(0,0)] = WHITE
+    HullRobot(opcodes.copy()).start()
+    points.print()
 }
 
 fun MutableMap<Point, Long>.getColor(point: Point): Long {
@@ -46,6 +49,36 @@ fun MutableMap<Point, Long>.getColor(point: Point): Long {
         return output
     }
     return BLACK
+}
+
+fun Map<Point, Long>.print() {
+    val max = this.size
+    val screen: MutableList<MutableList<Char>> = mutableListOf()
+    (0..max).forEach {  _ ->
+        screen.add(MutableList(size) {' '})
+    }
+    var maxX = Int.MIN_VALUE
+    var maxY = Int.MIN_VALUE
+    keys.forEach{k ->
+        val color = get(k)
+        screen[k.y][k.x] = when(color) {
+            WHITE -> '.'
+            BLACK -> ' '
+            else -> throw IllegalStateException("Not know color $color")
+        }
+        if (k.x > maxX) {
+            maxX = k.x
+        }
+        if (k.y > maxY) {
+            maxY = k.y
+        }
+    }
+    (0..maxY).forEach { y ->
+        (0..maxX).forEach { x ->
+            print(screen[y][x])
+        }
+        println()
+    }
 }
 
 fun Point.addX(offset: Int) {
