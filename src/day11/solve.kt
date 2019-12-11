@@ -1,7 +1,6 @@
 package day11
 
 import day10.Point
-import kotlinx.coroutines.yield
 import utils.IntCode
 import utils.copy
 import utils.readInput
@@ -44,7 +43,7 @@ fun main() {
 }
 
 fun MutableMap<Point, Long>.getColor(point: Point): Long {
-    var output = get(point)
+    val output = get(point)
     output?.let {
         return output
     }
