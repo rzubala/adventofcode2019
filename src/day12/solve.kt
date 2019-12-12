@@ -2,7 +2,6 @@ package day12
 
 import utils.readInput
 import java.lang.IllegalStateException
-import java.lang.Math.abs
 
 const val regexStr = "x=(-?\\d+), y=(-?\\d+), z=(-?\\d+)"
 const val STEPS = 1000
@@ -25,13 +24,9 @@ fun main() {
 }
 
 fun simulate(moons: List<Moon>) {
-    println("Step 0")
-    moons.forEach { it.print() }
-    (1..STEPS).forEach { s ->
+    (1..STEPS).forEach{ _ ->
         updateVelocity(moons)
         updatePosition(moons)
-        println("Step $s")
-        moons.forEach { it.print() }
     }
     calcEnergy(moons)
 }
@@ -39,7 +34,7 @@ fun simulate(moons: List<Moon>) {
 fun calcEnergy(moons: List<Moon>) {
     var energy = 0L
     moons.forEach { m ->
-        energy += (abs(m.x) + abs(m.y) + abs(m.z)) * (abs(m.v.x) + abs(m.v.y) + abs(m.v.z))
+        energy += (kotlin.math.abs(m.x) + kotlin.math.abs(m.y) + kotlin.math.abs(m.z)) * (kotlin.math.abs(m.v.x) + kotlin.math.abs(m.v.y) + kotlin.math.abs(m.v.z))
     }
     println("energy: $energy")
 }
@@ -84,7 +79,7 @@ fun updateMoonsVelocity(m1: Moon, m2: Moon) {
 
 private fun parseMoons(data: List<String>): List<Moon> {
     val regex = regexStr.toRegex()
-    val moons: List<Moon> = data.map { it ->
+    return data.map {
         val matchResult = regex.find(it)
         var x: Int = Int.MIN_VALUE
         var y: Int = Int.MIN_VALUE
@@ -101,7 +96,6 @@ private fun parseMoons(data: List<String>): List<Moon> {
         }
         Moon(x, y, z)
     }
-    return moons
 }
 
 fun Moon.print() {
