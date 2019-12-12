@@ -1,5 +1,6 @@
 package day12
 
+import utils.lcm
 import utils.readInput
 import java.lang.IllegalStateException
 
@@ -14,16 +15,56 @@ class Moon(ix: Int, iy:Int, iz:Int) : Point3D(ix, iy, iz) {
         y += v.y
         z += v.z
     }
+    fun copy(): Moon {
+        return Moon(x, y, z)
+    }
 }
 class Velocity(ix: Int, iy:Int, iz:Int) : Point3D(ix, iy, iz)
 
 fun main() {
     val data = readInput("src/day12/input.data")
     val moons: List<Moon> = parseMoons(data)
-    simulate(moons)
+    simulateSteps(moons.map {it.copy()})
+    simulate(moons.map {it.copy()})
 }
 
 fun simulate(moons: List<Moon>) {
+    val results = mutableListOf<Long>()
+    val initMoons: List<Moon> = moons.map {it.copy()}
+    results.add(findPeriod(moons.map {it.copy()}, initMoons) { m1: Moon, m2: Moon -> (m1.x == m2.x && m1.v.x == m2.v.x)})
+    results.add(findPeriod(moons.map {it.copy()}, initMoons) { m1: Moon, m2: Moon -> (m1.y == m2.y && m1.v.y == m2.v.y)})
+    results.add(findPeriod(moons.map {it.copy()}, initMoons) { m1: Moon, m2: Moon -> (m1.z == m2.z && m1.v.z == m2.v.z)})
+
+    var lcm = lcm(results[0], results[1])
+    lcm = lcm(lcm, results[2])
+    println("Part2: $lcm")
+}
+
+fun findPeriod(moons: List<Moon>, initMoons: List<Moon>, check: (Moon, Moon) -> Boolean): Long {
+    var i = 0L
+    while (true) {
+        updateVelocity(moons)
+        updatePosition(moons)
+        i++
+        if (isSame(moons, initMoons, check)) {
+            break
+        }
+    }
+    return i
+}
+
+fun isSame(moons: List<Moon>, initMoons: List<Moon>, check: (Moon, Moon) -> Boolean): Boolean {
+    var i = 0
+    moons.forEach { m->
+        if (!check(m, initMoons[i])) {
+            return false
+        }
+        i++
+    }
+    return true
+}
+
+fun simulateSteps(moons: List<Moon>) {
     (1..STEPS).forEach{ _ ->
         updateVelocity(moons)
         updatePosition(moons)
@@ -36,7 +77,7 @@ fun calcEnergy(moons: List<Moon>) {
     moons.forEach { m ->
         energy += (kotlin.math.abs(m.x) + kotlin.math.abs(m.y) + kotlin.math.abs(m.z)) * (kotlin.math.abs(m.v.x) + kotlin.math.abs(m.v.y) + kotlin.math.abs(m.v.z))
     }
-    println("energy: $energy")
+    println("Part1 energy: $energy")
 }
 
 fun updatePosition(moons: List<Moon>) {
@@ -96,8 +137,4 @@ private fun parseMoons(data: List<String>): List<Moon> {
         }
         Moon(x, y, z)
     }
-}
-
-fun Moon.print() {
-    println("$x $y $z : ${v.x} ${v.y} ${v.z}")
 }
