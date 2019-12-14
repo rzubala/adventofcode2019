@@ -45,12 +45,12 @@ fun main() {
             }
             else -> {
                 fuels += step
-                var res = !up
+                val res = !up
                 up = true
                 res
             }
         }) {
-            step = step.div(2).toLong()
+            step = step.div(2)
         }
     }
 }
