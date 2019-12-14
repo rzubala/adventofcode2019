@@ -3,9 +3,10 @@ package day14
 import utils.readInput
 import kotlin.math.ceil
 
-data class Chemical(val name: String, val cnt: Int)
+data class Chemical(val name: String, val cnt: Long)
 const val FUEL = "FUEL"
 const val ORE = "ORE"
+const val LIMIT = 1000000000000
 
 fun main() {
     val data = readInput("src/day14/input.data").map{
@@ -13,15 +14,31 @@ fun main() {
         val dst = row[1].split(" ")
         val src = row[0].split(", ").map { srcit ->
             val srcdata = srcit.split(" ")
-            Chemical(srcdata[1], srcdata[0].toInt())
+            Chemical(srcdata[1], srcdata[0].toLong())
         }
-        Chemical(dst[1], dst[0].toInt()) to src
+        Chemical(dst[1], dst[0].toLong()) to src
     }
-    val rests: MutableMap<String, Int> = mutableMapOf()
-    println("Part1: ${process(data, FUEL, 1, rests)}")
+
+    val rests: MutableMap<String, Long> = mutableMapOf()
+    val oresPerFuel = process(data, FUEL, 1L, rests)
+    println("Part1: $oresPerFuel")
+
+    rests.clear()
+    //part2
+    var cnt = 0
+    val start = ceil(LIMIT.toDouble()/oresPerFuel).times(1.1).toLong()   //add 10%
+    while (true) {
+        val fuels = start + cnt
+        val ores = process(data, FUEL, fuels, rests)
+        if (ores > LIMIT) {
+            println ("Part2: ${fuels - 1}")
+            break
+        }
+        cnt++
+    }
 }
 
-fun process(map: List<Pair<Chemical, List<Chemical>>>, chemicalName: String, scnt: Int, rests: MutableMap<String, Int>): Int {
+fun process(map: List<Pair<Chemical, List<Chemical>>>, chemicalName: String, scnt: Long, rests: MutableMap<String, Long>): Long {
     if (chemicalName == ORE) {
         return scnt
     }
@@ -47,14 +64,14 @@ fun process(map: List<Pair<Chemical, List<Chemical>>>, chemicalName: String, scn
         addRest(rests, dst.first.name, diff)
     }
     val subs = dst.second
-    var sum = 0
+    var sum = 0L
     subs.forEach {
         sum += process(map, it.name, cnt.times(it.cnt), rests)
     }
     return sum
 }
 
-fun addRest(map: MutableMap<String, Int>, name: String, diff: Int) {
+fun addRest(map: MutableMap<String, Long>, name: String, diff: Long) {
     map[name]?.let {rest ->
         map[name] = rest + diff
         return
