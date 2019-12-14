@@ -19,22 +19,39 @@ fun main() {
         Chemical(dst[1], dst[0].toLong()) to src
     }
 
-    val rests: MutableMap<String, Long> = mutableMapOf()
-    val oresPerFuel = process(data, FUEL, 1L, rests)
+    val oresPerFuel = process(data, FUEL, 1L, mutableMapOf())
     println("Part1: $oresPerFuel")
 
-    rests.clear()
     //part2
-    var cnt = 0
-    val start = ceil(LIMIT.toDouble()/oresPerFuel).times(1.1).toLong()   //add 10%
+    val initialStart = ceil(LIMIT.toDouble() / oresPerFuel).toLong()
+    var fuels = initialStart
+    var step = initialStart.times(0.1).toLong()
+    var up = false
     while (true) {
-        val fuels = start + cnt
-        val ores = process(data, FUEL, fuels, rests)
-        if (ores > LIMIT) {
-            println ("Part2: ${fuels - 1}")
+        val ores = process(data, FUEL, fuels, mutableMapOf())
+        if (step == 0L) {
+            if (ores > LIMIT) {
+                fuels--
+            }
+            println("Part2: $fuels")
             break
         }
-        cnt++
+        if (when {
+            ores > LIMIT -> {
+                fuels -= step
+                val res = up
+                up = false
+                res
+            }
+            else -> {
+                fuels += step
+                var res = !up
+                up = true
+                res
+            }
+        }) {
+            step = step.div(2).toLong()
+        }
     }
 }
 
@@ -73,7 +90,7 @@ fun process(map: List<Pair<Chemical, List<Chemical>>>, chemicalName: String, scn
 
 fun addRest(map: MutableMap<String, Long>, name: String, diff: Long) {
     map[name]?.let {rest ->
-        map[name] = rest + diff
+        map[name] = rest.plus(diff)
         return
     }
     map[name] = diff
