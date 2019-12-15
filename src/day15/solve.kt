@@ -45,11 +45,11 @@ fun main() {
             if (lastStatus == OXYGEN) {
                 oxygen.x = position.x
                 oxygen.y = position.y
-                println ("Part1: ${path.size}: $oxygen")
+                println ("Part1: ${path.size}")
             }
             lastMove = getNextMove(position)
             if (lastMove == 0L) {
-                println("Part2 ${spreadOxygen(map, oxygen, 0)}")
+                println("Part2: ${spreadOxygen(map, oxygen, 0)}")
                 return 0
             }
             return lastMove
