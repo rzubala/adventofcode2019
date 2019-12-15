@@ -16,8 +16,6 @@ const val WALL = 0L
 const val MOVED = 1L
 const val OXYGEN = 2L
 
-const val limit = 1000
-
 fun main() {
     val code = readInput("src/day15/input.data")[0].split(",").map { it.toLong() }
 
@@ -28,7 +26,6 @@ fun main() {
         val position = Point(0, 0)
         var lastMove = NORTH
         var lastStatus = MOVED
-        var cnt = 0
         var back = false
         fun start() {
             map[Point(0, 0)] = MOVED
@@ -36,32 +33,22 @@ fun main() {
             IntCode(code.copy()).run({ getInput() }) { out ->
                 lastStatus = out
                 map[position.newPosition(lastMove)] = out
-                println("Map $cnt: ${position.newPosition(lastMove)} = $lastStatus  -> $lastMove")
                 if (out != WALL) {
                     position.move(lastMove)
                     if (!back) {
                         path.add(lastMove)
                     }
                 }
-
-                cnt++
-                //map.print(position)
-                if (cnt > limit) {
-                    throw IllegalStateException("STOP")
-                }
             }
         }
         fun getInput(): Long {
             if (lastStatus == OXYGEN) {
-                println (path.size)
-                //map.print(position)
-                println("OXYGEN")
-                return 0
+                println ("Part1: ${path.size}")
             }
             lastMove = getNextMove(position)
             if (lastMove == 0L) {
                 map.print(position)
-                throw IllegalStateException("can not move")
+                println("Board created!")
                 return 0
             }
             return lastMove
@@ -75,7 +62,6 @@ fun main() {
             val south = map[pos.newPosition(SOUTH)] ?: return SOUTH
 
             if (path.isEmpty()) {
-                println("Path is empty $pos")
                 return 0
             }
             back = true
