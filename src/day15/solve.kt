@@ -16,33 +16,46 @@ const val WALL = 0L
 const val MOVED = 1L
 const val OXYGEN = 2L
 
+const val limit = 1000
+
 fun main() {
     val code = readInput("src/day15/input.data")[0].split(",").map { it.toLong() }
 
     val map: MutableMap<Point, Long> = mutableMapOf()
+    val path: MutableList<Long> = mutableListOf()
 
     class Droid {
         val position = Point(0, 0)
         var lastMove = NORTH
         var lastStatus = MOVED
+        var cnt = 0
+        var back = false
         fun start() {
             map[Point(0, 0)] = MOVED
 
             IntCode(code.copy()).run({ getInput() }) { out ->
                 lastStatus = out
                 map[position.newPosition(lastMove)] = out
-                println("Map: ${position.newPosition(lastMove)} = $lastStatus  -> $lastMove")
+                println("Map $cnt: ${position.newPosition(lastMove)} = $lastStatus  -> $lastMove")
                 if (out != WALL) {
                     position.move(lastMove)
+                    if (!back) {
+                        path.add(lastMove)
+                    }
                 }
-                println("Position: $position")
-                map.print(position)
+
+                cnt++
+                //map.print(position)
+                if (cnt > limit) {
+                    throw IllegalStateException("STOP")
+                }
             }
         }
         fun getInput(): Long {
             if (lastStatus == OXYGEN) {
+                println (path.size)
+                //map.print(position)
                 println("OXYGEN")
-                throw IllegalStateException("OXYGEN")
                 return 0
             }
             lastMove = getNextMove(position)
@@ -55,38 +68,24 @@ fun main() {
         }
 
         private fun getNextMove(pos: Point): Long {
+            back = false
             val west = map[pos.newPosition(WEST)] ?: return WEST
             val north = map[pos.newPosition(NORTH)] ?: return NORTH
             val east = map[pos.newPosition(EAST)] ?: return EAST
             val south = map[pos.newPosition(SOUTH)] ?: return SOUTH
 
-            if (west != WALL) {
-                val res = getNextMove(pos.newPosition(WEST))
-                if (res > 0) {
-                    return WEST
-                }
+            if (path.isEmpty()) {
+                println("Path is empty $pos")
+                return 0
             }
-            if (north != WALL) {
-                val res = getNextMove(pos.newPosition(NORTH))
-                if (res > 0) {
-                    return NORTH
-                }
+            back = true
+            return when(path.removeAt(path.size-1)) {
+               NORTH -> SOUTH
+               SOUTH -> NORTH
+               WEST -> EAST
+               EAST -> WEST
+               else -> 0
             }
-            if (east != WALL) {
-                val res = getNextMove(pos.newPosition(EAST))
-                if (res > 0) {
-                    return EAST
-                }
-            }
-            if (south != WALL) {
-                val res = getNextMove(pos.newPosition(SOUTH))
-                if (res > 0) {
-                    return SOUTH
-                }
-            }
-
-            println("Not found $pos")
-            return 0
         }
     }
 
@@ -132,8 +131,6 @@ fun Map<Point, Long>.print(droid: Point) {
             }
         }
     }
-
-    println("$min $max")
 
     (min.y..max.y).forEach { y ->
         (min.x..max.x).forEach { x ->
