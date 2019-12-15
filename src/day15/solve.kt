@@ -2,6 +2,7 @@ package day15
 
 import day10.Point
 import utils.IntCode
+import utils.clearConsole
 import utils.copy
 import utils.readInput
 import java.lang.IllegalStateException
@@ -96,7 +97,6 @@ fun Point.move(dir: Long) {
 
 private fun spreadOxygen(map: MutableMap<Point, Long>, pos: Point, level: Int): Int {
     var max = level
-
     if (map[pos.newPosition(NORTH)] == MOVED) {
         map[pos.newPosition(NORTH)] = OXYGEN
         val tLevel = spreadOxygen(map, pos.newPosition(NORTH), level+1)
@@ -128,7 +128,7 @@ private fun spreadOxygen(map: MutableMap<Point, Long>, pos: Point, level: Int): 
     return max
 }
 
-fun Map<Point, Long>.print(droid: Point) {
+fun Map<Point, Long>.print() {
     val size = this.size
     val min = Point(Int.MAX_VALUE, Int.MAX_VALUE)
     val max = Point(Int.MIN_VALUE, Int.MIN_VALUE)
@@ -156,19 +156,15 @@ fun Map<Point, Long>.print(droid: Point) {
         (min.x..max.x).forEach { x ->
             var empty = true
             this[Point(x,y)]?.let {
-                if (droid.x == x && droid.y == y){
-                    print('D')
-                } else {
-                    print(
-                        when (it) {
-                            WALL -> '#'
-                            MOVED -> '.'
-                            OXYGEN -> 'O'
-                            else -> ' '
-                        }
-                    )
-                }
                 empty = false
+                print(
+                    when (it) {
+                        WALL -> '#'
+                        MOVED -> ' '
+                        OXYGEN -> 'O'
+                        else -> ' '
+                    }
+                )
             }
             if (empty) {
                 print(' ')
@@ -176,5 +172,4 @@ fun Map<Point, Long>.print(droid: Point) {
         }
         println()
     }
-
 }
