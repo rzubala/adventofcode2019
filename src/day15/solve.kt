@@ -1,6 +1,5 @@
 package day15
 
-import day02.part2value
 import day10.Point
 import utils.IntCode
 import utils.copy
@@ -24,6 +23,7 @@ fun main() {
 
     class Droid {
         val position = Point(0, 0)
+        val oxygen = Point(0, 0)
         var lastMove = NORTH
         var lastStatus = MOVED
         var back = false
@@ -43,12 +43,13 @@ fun main() {
         }
         fun getInput(): Long {
             if (lastStatus == OXYGEN) {
-                println ("Part1: ${path.size}")
+                oxygen.x = position.x
+                oxygen.y = position.y
+                println ("Part1: ${path.size}: $oxygen")
             }
             lastMove = getNextMove(position)
             if (lastMove == 0L) {
-                map.print(position)
-                println("Board created!")
+                println("Part2 ${spreadOxygen(map, oxygen, 0)}")
                 return 0
             }
             return lastMove
@@ -56,11 +57,10 @@ fun main() {
 
         private fun getNextMove(pos: Point): Long {
             back = false
-            val west = map[pos.newPosition(WEST)] ?: return WEST
-            val north = map[pos.newPosition(NORTH)] ?: return NORTH
-            val east = map[pos.newPosition(EAST)] ?: return EAST
-            val south = map[pos.newPosition(SOUTH)] ?: return SOUTH
-
+            map[pos.newPosition(WEST)] ?: return WEST
+            map[pos.newPosition(NORTH)] ?: return NORTH
+            map[pos.newPosition(EAST)] ?: return EAST
+            map[pos.newPosition(SOUTH)] ?: return SOUTH
             if (path.isEmpty()) {
                 return 0
             }
@@ -94,10 +94,44 @@ fun Point.move(dir: Long) {
     }
 }
 
+private fun spreadOxygen(map: MutableMap<Point, Long>, pos: Point, level: Int): Int {
+    var max = level
+
+    if (map[pos.newPosition(NORTH)] == MOVED) {
+        map[pos.newPosition(NORTH)] = OXYGEN
+        val tLevel = spreadOxygen(map, pos.newPosition(NORTH), level+1)
+        if (tLevel > max) {
+            max = tLevel
+        }
+    }
+    if (map[pos.newPosition(SOUTH)] == MOVED) {
+        map[pos.newPosition(SOUTH)] = OXYGEN
+        val tLevel = spreadOxygen(map, pos.newPosition(SOUTH), level+1)
+        if (tLevel > max) {
+            max = tLevel
+        }
+    }
+    if (map[pos.newPosition(WEST)] == MOVED) {
+        map[pos.newPosition(WEST)] = OXYGEN
+        val tLevel = spreadOxygen(map, pos.newPosition(WEST), level+1)
+        if (tLevel > max) {
+            max = tLevel
+        }
+    }
+    if (map[pos.newPosition(EAST)] == MOVED) {
+        map[pos.newPosition(EAST)] = OXYGEN
+        val tLevel = spreadOxygen(map, pos.newPosition(EAST), level+1)
+        if (tLevel > max) {
+            max = tLevel
+        }
+    }
+    return max
+}
+
 fun Map<Point, Long>.print(droid: Point) {
     val size = this.size
-    var min = Point(Int.MAX_VALUE, Int.MAX_VALUE)
-    var max = Point(Int.MIN_VALUE, Int.MIN_VALUE)
+    val min = Point(Int.MAX_VALUE, Int.MAX_VALUE)
+    val max = Point(Int.MIN_VALUE, Int.MIN_VALUE)
 
     (-size until size).forEach { y ->
         (-size until size).forEach { x ->
