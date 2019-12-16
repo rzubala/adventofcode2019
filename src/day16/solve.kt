@@ -14,7 +14,7 @@ fun main() {
     (0 until PHASES).forEach { _ ->
         result = calculatePhase(result)
     }
-    println("Part1 ${result.take(8).joinToString("") { it.toString() }}")
+    println("Part1: ${result.take(8).joinToString("") { it.toString() }}")
     part2(data.copy())
 }
 
@@ -59,12 +59,10 @@ fun part2(data: List<Long>) {
     }
     val offset = data.take(7).joinToString("") { it.toString() }.toLong()
     (0 until PHASES).forEach { _ ->
-        var repeat = result.size - 2
-        while(repeat > offset - 5) {
-            repeat--
-            val sum = result[repeat + 1] + result[repeat]
-            result[repeat] = abs(sum % 10)
+        (result.size - 2 downTo offset).forEach { index ->
+            val sum = result[index.toInt() + 1] + result[index.toInt()]
+            result[index.toInt()] = abs(sum % 10)
         }
     }
-    println("Part2 ${result.subList(offset.toInt(), offset.toInt() + 8).joinToString("") { it.toString() }}")
+    println("Part2: ${result.subList(offset.toInt(), offset.toInt() + 8).joinToString("") { it.toString() }}")
 }
