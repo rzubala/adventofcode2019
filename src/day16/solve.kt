@@ -8,8 +8,7 @@ const val PHASES = 100
 const val REPEAT = 10000
 
 fun main() {
-    val data = readInput("src/day16/input.data")[0].toCharArray().map { it.toString().toInt() }.toMutableList()
-
+    val data = readInput("src/day16/input.data")[0].toCharArray().map { it.toString().toInt() }
     var result = data.copy()
     (0 until PHASES).forEach { _ ->
         result = calculatePhase(result)
@@ -30,26 +29,22 @@ private fun calculatePhase(data: List<Int>): MutableList<Int> {
 fun calculate(data: List<Int>, outPosition: Int): Int {
     var sum = 0
     val repeat = outPosition.plus(1)
-    var iterator = outPosition
+    var from = outPosition
     var add = true
     do {
-        if (iterator >= data.size) {
+        if (from >= data.size) {
             break
         }
-        var to = iterator + repeat
+        var to = from.plus(repeat)
         if (to >= data.size) {
             to = data.size
         }
-        val sumIt = data.subList(iterator, to).sum()
-        if (add) {
-            sum += sumIt
-        } else {
-            sum -= sumIt
-        }
+        val sumIt = data.subList(from, to).sum()
+        sum += if (add) sumIt else -sumIt
         add = !add
-        iterator += repeat.times(2)
+        from += repeat.times(2)
     } while (true)
-    return abs(sum % 10)
+    return abs(sum) % 10
 }
 
 fun part2(data: List<Int>) {
@@ -60,8 +55,8 @@ fun part2(data: List<Int>) {
     val offset = data.take(7).joinToString("") { it.toString() }.toInt()
     (0 until PHASES).forEach { _ ->
         (result.size - 2 downTo offset).forEach { index ->
-            val sum = result[index.plus(1)] + result[index]
-            result[index] = abs(sum % 10)
+            val sum = result[index.plus(1)].plus(result[index])
+            result[index] = abs(sum) % 10
         }
     }
     println("Part2: ${result.subList(offset, offset.plus(8)).joinToString("") { it.toString() }}")
