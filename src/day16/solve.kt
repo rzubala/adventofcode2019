@@ -2,13 +2,15 @@ package day16
 
 import utils.readInput
 
+const val PHASES = 100
+
 fun main() {
-    val basePattern = mutableListOf<Int>(0, 1, 0, -1)
-    val data = readInput("src/day16/input.data")[0].toString().toCharArray().map { it.toString().toInt() }
+    val basePattern = mutableListOf(0, 1, 0, -1)
+    val data = readInput("src/day16/input.data")[0].toCharArray().map { it.toString().toInt() }
     var result = data
-    (0 until 100).forEach { _ ->
+
+    (0 until PHASES).forEach { _ ->
         result = calculatePhase(result, basePattern)
-        println(result.toString())
     }
     println(result.subList(0, 8).joinToString("") { it.toString() })
 }
@@ -36,7 +38,7 @@ fun createPatter(pattern: List<Int>, pos: Int, size: Int): List<Int> {
     val result = mutableListOf<Int>()
     while (true) {
         pattern.forEach { i ->
-            (0 until pos).forEach { p ->
+            (0 until pos).forEach { _ ->
                 result.add(i)
             }
         }
