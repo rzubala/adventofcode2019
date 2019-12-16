@@ -1,34 +1,21 @@
 package day16
 
+import utils.copy
 import utils.readInput
+import kotlin.math.abs
 
 const val PHASES = 100
 const val REPEAT = 10000
 
-val basePattern = mutableListOf<Int>(0, 1, 0, -1)
-
 fun main() {
     val data = readInput("src/day16/input.data")[0].toCharArray().map { it.toString().toLong() }.toMutableList()
 
-    //Part1
-    var result = data
+    var result = data.copy()
     (0 until PHASES).forEach { _ ->
         result = calculatePhase(result)
     }
-    println("Part1 ${result.subList(0, 8).joinToString("") { it.toString() }}")
-
-    //Part2
-    /*
-    val input = mutableListOf<Long>()
-    (0 until REPEAT).forEach { _ ->
-        input.addAll(data)
-    }
-    var result = input
-    (0 until PHASES).forEach { p ->
-        println("phase $p")
-        result = calculatePhase(result)
-    }
-    */
+    println("Part1 ${result.take(8).joinToString("") { it.toString() }}")
+    part2(data.copy())
 }
 
 private fun calculatePhase(data: List<Long>): MutableList<Long> {
@@ -62,5 +49,22 @@ fun calculate(data: List<Long>, outPosition: Long): Long {
         add = !add
         iterator += repeat.times(2)
     } while (true)
-    return sum.toString().toCharArray().last().toString().toLong()
+    return abs(sum % 10)
+}
+
+fun part2(data: List<Long>) {
+    val result = mutableListOf<Long>()
+    (0 until REPEAT).forEach { _ ->
+        result.addAll(data)
+    }
+    val offset = data.take(7).joinToString("") { it.toString() }.toLong()
+    (0 until PHASES).forEach { _ ->
+        var repeat = result.size - 2
+        while(repeat > offset - 5) {
+            repeat--
+            val sum = result[repeat + 1] + result[repeat]
+            result[repeat] = abs(sum % 10)
+        }
+    }
+    println("Part2 ${result.subList(offset.toInt(), offset.toInt() + 8).joinToString("") { it.toString() }}")
 }
