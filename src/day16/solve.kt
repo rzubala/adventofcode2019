@@ -5,19 +5,17 @@ import utils.readInput
 const val PHASES = 100
 const val REPEAT = 10000
 
-val basePattern = mutableListOf<Long>(0, 1, 0, -1)
+val basePattern = mutableListOf<Int>(0, 1, 0, -1)
 
 fun main() {
     val data = readInput("src/day16/input.data")[0].toCharArray().map { it.toString().toLong() }.toMutableList()
 
     //Part1
-
     var result = data
     (0 until PHASES).forEach { _ ->
         result = calculatePhase(result)
     }
     println("Part1 ${result.subList(0, 8).joinToString("") { it.toString() }}")
-
 
     //Part2
     /*
@@ -30,7 +28,7 @@ fun main() {
         println("phase $p")
         result = calculatePhase(result)
     }
-     */
+    */
 }
 
 private fun calculatePhase(data: List<Long>): MutableList<Long> {
@@ -44,21 +42,25 @@ private fun calculatePhase(data: List<Long>): MutableList<Long> {
 
 fun calculate(data: List<Long>, outPosition: Long): Long {
     var sum = 0L
-    (0L until data.size).forEach { inPosition ->
-        val v = data[inPosition.toInt()]
-        if (v != 0L) {
-            val pattern = getPattern(outPosition, inPosition)
-            if (pattern != 0L) {
-                sum += (v.times(pattern))
-            }
+    val repeat = outPosition.plus(1).toInt()
+    var iterator = outPosition.toInt()
+    var add = true
+    do {
+        if (iterator >= data.size) {
+            break
         }
-    }
+        var to = iterator + repeat
+        if (to >= data.size) {
+            to = data.size
+        }
+        val sumIt = data.subList(iterator, to).sum()
+        if (add) {
+            sum += sumIt
+        } else {
+            sum -= sumIt
+        }
+        add = !add
+        iterator += repeat.times(2)
+    } while (true)
     return sum.toString().toCharArray().last().toString().toLong()
-}
-
-fun getPattern(outP: Long, inP: Long): Long {
-    val repeat = outP.plus(1)
-    val patternSize = repeat.times(basePattern.size)
-    val index = (inP.plus(1) % patternSize).div(repeat)
-    return basePattern[index.toInt()]
 }
