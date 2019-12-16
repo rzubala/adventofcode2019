@@ -3,23 +3,26 @@ package day16
 import utils.readInput
 
 const val PHASES = 100
+const val REPEAT = 10000
 
-val basePattern = mutableListOf(0, 1, 0, -1)
+val basePattern = mutableListOf<Long>(0, 1, 0, -1)
 
 fun main() {
-    val data = readInput("src/day16/input.data")[0].toCharArray().map { it.toString().toInt() }.toMutableList()
+    val data = readInput("src/day16/input.data")[0].toCharArray().map { it.toString().toLong() }.toMutableList()
 
     //Part1
+
     var result = data
     (0 until PHASES).forEach { _ ->
         result = calculatePhase(result)
     }
     println("Part1 ${result.subList(0, 8).joinToString("") { it.toString() }}")
 
+
     //Part2
     /*
-    val input = mutableListOf<Int>()
-    (0 until 10000).forEach { _ ->
+    val input = mutableListOf<Long>()
+    (0 until REPEAT).forEach { _ ->
         input.addAll(data)
     }
     var result = input
@@ -27,34 +30,35 @@ fun main() {
         println("phase $p")
         result = calculatePhase(result)
     }
-    */
+     */
 }
 
-private fun calculatePhase(data: List<Int>): MutableList<Int> {
-    val result = mutableListOf<Int>()
-    data.indices.forEach { n ->
-        val value = calculate2(data, n)
+private fun calculatePhase(data: List<Long>): MutableList<Long> {
+    val result = mutableListOf<Long>()
+    (0L until data.size).forEach { n ->
+        val value = calculate(data, n)
         result.add(value)
     }
     return result
 }
 
-fun calculate2(data: List<Int>, outPosition: Int): Int {
-    var sum = 0
-    data.forEachIndexed { inPosition, v ->
-        if (v != 0) {
+fun calculate(data: List<Long>, outPosition: Long): Long {
+    var sum = 0L
+    (0L until data.size).forEach { inPosition ->
+        val v = data[inPosition.toInt()]
+        if (v != 0L) {
             val pattern = getPattern(outPosition, inPosition)
-            if (pattern != null) {
+            if (pattern != 0L) {
                 sum += (v.times(pattern))
             }
         }
     }
-    return sum.toString().toCharArray().last().toString().toInt()
+    return sum.toString().toCharArray().last().toString().toLong()
 }
 
-fun getPattern(outP: Int, inP: Int): Int {
+fun getPattern(outP: Long, inP: Long): Long {
     val repeat = outP.plus(1)
     val patternSize = repeat.times(basePattern.size)
     val index = (inP.plus(1) % patternSize).div(repeat)
-    return basePattern[index]
+    return basePattern[index.toInt()]
 }
