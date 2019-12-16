@@ -106,4 +106,4 @@ class IntCode(private val opcodes: MutableList<Long>) {
     }
 }
 
-fun List<Long>.copy(): MutableList<Long> = mutableListOf(*this.toTypedArray())
+inline fun <reified T> List<T>.copy() = mutableListOf(*this.toTypedArray())

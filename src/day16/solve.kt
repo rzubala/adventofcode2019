@@ -8,7 +8,7 @@ const val PHASES = 100
 const val REPEAT = 10000
 
 fun main() {
-    val data = readInput("src/day16/input.data")[0].toCharArray().map { it.toString().toLong() }.toMutableList()
+    val data = readInput("src/day16/input.data")[0].toCharArray().map { it.toString().toInt() }.toMutableList()
 
     var result = data.copy()
     (0 until PHASES).forEach { _ ->
@@ -18,19 +18,19 @@ fun main() {
     part2(data.copy())
 }
 
-private fun calculatePhase(data: List<Long>): MutableList<Long> {
-    val result = mutableListOf<Long>()
-    (0L until data.size).forEach { n ->
+private fun calculatePhase(data: List<Int>): MutableList<Int> {
+    val result = mutableListOf<Int>()
+    data.indices.forEach { n ->
         val value = calculate(data, n)
         result.add(value)
     }
     return result
 }
 
-fun calculate(data: List<Long>, outPosition: Long): Long {
-    var sum = 0L
-    val repeat = outPosition.plus(1).toInt()
-    var iterator = outPosition.toInt()
+fun calculate(data: List<Int>, outPosition: Int): Int {
+    var sum = 0
+    val repeat = outPosition.plus(1)
+    var iterator = outPosition
     var add = true
     do {
         if (iterator >= data.size) {
@@ -52,17 +52,17 @@ fun calculate(data: List<Long>, outPosition: Long): Long {
     return abs(sum % 10)
 }
 
-fun part2(data: List<Long>) {
-    val result = mutableListOf<Long>()
+fun part2(data: List<Int>) {
+    val result = mutableListOf<Int>()
     (0 until REPEAT).forEach { _ ->
         result.addAll(data)
     }
-    val offset = data.take(7).joinToString("") { it.toString() }.toLong()
+    val offset = data.take(7).joinToString("") { it.toString() }.toInt()
     (0 until PHASES).forEach { _ ->
         (result.size - 2 downTo offset).forEach { index ->
-            val sum = result[index.toInt() + 1] + result[index.toInt()]
-            result[index.toInt()] = abs(sum % 10)
+            val sum = result[index.plus(1)] + result[index]
+            result[index] = abs(sum % 10)
         }
     }
-    println("Part2: ${result.subList(offset.toInt(), offset.toInt() + 8).joinToString("") { it.toString() }}")
+    println("Part2: ${result.subList(offset, offset.plus(8)).joinToString("") { it.toString() }}")
 }
