@@ -8,23 +8,26 @@ import utils.readInput
 fun main() {
     val code = readInput("src/day17/input.data")[0].split(",").map { it.toLong() }
 
-    val map = mutableMapOf<Point, Char>()
+    val map = getMap(code)
+    findMapCrossings(map)
+}
 
+private fun getMap(code: List<Long>): MutableMap<Point, Char> {
+    val map = mutableMapOf<Point, Char>()
     var x = 0
     var y = 0
     IntCode(code.copy()).run({ 0L }) { out ->
-        when(out.toInt()) {
+        when (out.toInt()) {
             10 -> {
                 y++
                 x = -1
             }
-            '#'.toInt() -> map[Point(x,y)] = '#'
+            '#'.toInt() -> map[Point(x, y)] = '#'
         }
         x++
-        print(out.toChar())
+        //print(out.toChar())
     }
-    println(map.toString())
-    findMapCrossings(map)
+    return map
 }
 
 fun findMapCrossings(map: MutableMap<Point, Char>) {
@@ -34,7 +37,6 @@ fun findMapCrossings(map: MutableMap<Point, Char>) {
             map[p.down()]?.let {d ->
                 map[p.left()]?.let {l ->
                     map[p.right()]?.let {r ->
-                        println("found $p")
                         sum += p.x.times(p.y)
                     }
                 }
