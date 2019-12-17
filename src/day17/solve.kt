@@ -30,11 +30,47 @@ fun main() {
     path(start, map)
 
     //Part2
-    //A, A, B, C, C, A, C, B, C, B,
-    //4L, 4L, 6L, 10R, 6L
-    //12L, 6L, 10R, 6L
-    //8R, 10R, 6L
-    
+    program2(code.toMutableList())
+}
+
+fun program2(code: MutableList<Long>) {
+    //A,A,B,C,C,A,C,B,C,B,
+    //L,4,L,4,L,6,R,10,L,6
+    //L,12,L,6,R,10,L,6
+    //R,8,R,10,L,6
+
+    val program: List<Char> = listOf<Char>('A',',','A',',','B',',','C',',','C',',','A',',','C',',','B',',','C',',','B','\n')
+    val funA: List<Char> = listOf<Char>('L',',','4',',','L',',','4',',','L',',','6',',','R',',','1','0',',','L',',','6','\n')
+    val funB: List<Char> = listOf<Char>('L',',','1','2',',','L',',','6',',','R',',','1','0',',','L',',','6','\n')
+    val funC: List<Char> = listOf<Char>('R',',','8',',','R',',','1','0',',','L',',','6','\n')
+    val confirm = listOf<Char>('n','\n')
+    println(program.map{ it.toInt()}.toString())
+    println(funA.map{ it.toInt()}.toString())
+    println(funB.map{ it.toInt()}.toString())
+    println(funC.map{ it.toInt()}.toString())
+    println(confirm.map{ it.toInt()}.toString())
+
+    val input = mutableListOf<Char>()
+    input.addAll(program)
+    input.addAll(funA)
+    input.addAll(funB)
+    input.addAll(funC)
+    input.addAll(confirm)
+    var i = 0
+
+    code[0] = 2
+
+    println("PART2")
+
+    IntCode(code.copy()).run({
+        val value = input[i].toInt().toLong()
+        i++
+        println("input: $value")
+        value
+    }) { out ->
+        println(out)
+        //print(out.toChar())
+    }
 }
 
 enum class Directions {U, L, D, R}
@@ -80,7 +116,7 @@ fun path(start: Point, map: MutableMap<Point, Char>) {
                            else -> throw IllegalStateException("not allowed")
                        }
                    }
-                   print("$cnt$turn, ")
+                   print("$turn,$cnt,")
                }
                cnt = 0
                var found = false
