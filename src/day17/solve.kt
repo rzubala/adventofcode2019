@@ -43,7 +43,7 @@ fun program2(code: MutableList<Long>) {
     val funA: List<Char> = listOf<Char>('L',',','4',',','L',',','4',',','L',',','6',',','R',',','1','0',',','L',',','6','\n')
     val funB: List<Char> = listOf<Char>('L',',','1','2',',','L',',','6',',','R',',','1','0',',','L',',','6','\n')
     val funC: List<Char> = listOf<Char>('R',',','8',',','R',',','1','0',',','L',',','6','\n')
-    val confirm = listOf<Char>('n','\n')
+    val confirm = listOf<Char>('y','\n')
     println(program.map{ it.toInt()}.toString())
     println(funA.map{ it.toInt()}.toString())
     println(funB.map{ it.toInt()}.toString())
@@ -60,17 +60,14 @@ fun program2(code: MutableList<Long>) {
 
     code[0] = 2
 
-    println("PART2")
-
-    IntCode(code.copy()).run({
+    println(IntCode(code.copy()).run({
         val value = input[i].toInt().toLong()
         i++
         println("input: $value")
         value
     }) { out ->
-        println(out)
-        //print(out.toChar())
-    }
+        print(out.toChar())
+    })
 }
 
 enum class Directions {U, L, D, R}
