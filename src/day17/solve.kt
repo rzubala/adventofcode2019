@@ -34,32 +34,14 @@ fun main() {
 }
 
 fun program2(code: MutableList<Long>) {
-    //A,A,B,C,C,A,C,B,C,B,
-    //L,4,L,4,L,6,R,10,L,6
-    //L,12,L,6,R,10,L,6
-    //R,8,R,10,L,6
-
-    val program: List<Char> = listOf<Char>('A',',','A',',','B',',','C',',','C',',','A',',','C',',','B',',','C',',','B','\n')
-    val funA: List<Char> = listOf<Char>('L',',','4',',','L',',','4',',','L',',','6',',','R',',','1','0',',','L',',','6','\n')
-    val funB: List<Char> = listOf<Char>('L',',','1','2',',','L',',','6',',','R',',','1','0',',','L',',','6','\n')
-    val funC: List<Char> = listOf<Char>('R',',','8',',','R',',','1','0',',','L',',','6','\n')
-    val confirm = listOf<Char>('y','\n')
-    println(program.map{ it.toInt()}.toString())
-    println(funA.map{ it.toInt()}.toString())
-    println(funB.map{ it.toInt()}.toString())
-    println(funC.map{ it.toInt()}.toString())
-    println(confirm.map{ it.toInt()}.toString())
-
     val input = mutableListOf<Char>()
-    input.addAll(program)
-    input.addAll(funA)
-    input.addAll(funB)
-    input.addAll(funC)
-    input.addAll(confirm)
+    input.addAll(listOf('A',',','A',',','B',',','C',',','C',',','A',',','C',',','B',',','C',',','B','\n'))        //A,A,B,C,C,A,C,B,C,B,
+    input.addAll(listOf('L',',','4',',','L',',','4',',','L',',','6',',','R',',','1','0',',','L',',','6','\n'))    //L,4,L,4,L,6,R,10,L,6
+    input.addAll(listOf('L',',','1','2',',','L',',','6',',','R',',','1','0',',','L',',','6','\n'))                //L,12,L,6,R,10,L,6
+    input.addAll(listOf('R',',','8',',','R',',','1','0',',','L',',','6','\n'))                                    //R,8,R,10,L,6
+    input.addAll(listOf('y','\n'))
     var i = 0
-
     code[0] = 2
-
     println(IntCode(code.copy()).run({
         val value = input[i].toInt().toLong()
         i++
@@ -161,10 +143,10 @@ fun Point.move(dir: Directions): Point {
 fun findMapCrossings(map: MutableMap<Point, Char>) {
     var sum = 0
     map.keys.forEach{p ->
-        map[p.up()]?.let {u ->
-            map[p.down()]?.let {d ->
-                map[p.left()]?.let {l ->
-                    map[p.right()]?.let {r ->
+        map[p.up()]?.let {
+            map[p.down()]?.let {
+                map[p.left()]?.let {
+                    map[p.right()]?.let {
                         sum += p.x.times(p.y)
                     }
                 }
