@@ -28,15 +28,22 @@ fun main() {
     }
     findMapCrossings(map)
     path(start, map)
+
+    //Part2
+    //A, A, B, C, C, A, C, B, C, B,
+    //4L, 4L, 6L, 10R, 6L
+    //12L, 6L, 10R, 6L
+    //8R, 10R, 6L
+    
 }
 
 enum class Directions {U, L, D, R}
 
 fun path(start: Point, map: MutableMap<Point, Char>) {
     var dir = Directions.U
+    var prevDir = dir
     var lastPosition = start
     var cnt = 0
-    var it = 0
     main@ while (true) {
         val next = when(dir) {
            Directions.U -> { map[lastPosition.up()] ?: '.' }
@@ -51,7 +58,29 @@ fun path(start: Point, map: MutableMap<Point, Char>) {
            }
            '.' -> {
                if (cnt > 0) {
-                   print("$cnt$dir, ")
+                   val turn = when(prevDir) {
+                       Directions.U -> when(dir) {
+                           Directions.L -> 'L'
+                           Directions.R -> 'R'
+                           else -> throw IllegalStateException("not allowed")
+                       }
+                       Directions.D -> when(dir) {
+                           Directions.L -> 'R'
+                           Directions.R -> 'L'
+                           else -> throw IllegalStateException("not allowed")
+                       }
+                       Directions.L -> when(dir) {
+                           Directions.U -> 'R'
+                           Directions.D -> 'L'
+                           else -> throw IllegalStateException("not allowed")
+                       }
+                       Directions.R -> when(dir) {
+                           Directions.U -> 'L'
+                           Directions.D -> 'R'
+                           else -> throw IllegalStateException("not allowed")
+                       }
+                   }
+                   print("$cnt$turn, ")
                }
                cnt = 0
                var found = false
@@ -67,6 +96,7 @@ fun path(start: Point, map: MutableMap<Point, Char>) {
                        if (testPosition != lastPosition) {
                            map[testPosition]?.let {
                                lastPosition = testPosition
+                               prevDir = dir
                                dir = d
                                found = true
                                cnt++
