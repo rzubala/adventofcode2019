@@ -28,9 +28,10 @@ fun main() {
         y++
     }
     map.print()
-    println(keysMap.toString())
-    println(doorsMap.toString())
-    println(start)
+
+    //TODO this puzzle was solved in Python script but it will be coded in Kotlin as well later
+    //Part1 4248
+    //Part2 1878
 }
 
 fun List<List<Char>>.findKeys(position: Point, foundKeys: MutableList<Char>) {
