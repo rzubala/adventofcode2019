@@ -12,31 +12,34 @@ fun main() {
     val code = readInput("src/day19/input.data")[0].split(",").map { it.toLong() }
 
     //Part1
-    val map1: MutableList<MutableList<Int>> = buildMap(code, LAST_INDEX )
-    println("sum ${ map1.sumBy { it.sum() }}")
-    println(map1.forEach { println(it.joinToString("") { it.toString() }) })
+//    val map1: MutableList<MutableList<Int>> = buildMap(code, LAST_INDEX )
+//    println("sum ${ map1.sumBy { it.sum() }}")
+//    println(map1.forEach { println(it.joinToString("") { it.toString() }) })
 
     //Part2
     val size: Int = 1100
     val map: MutableList<MutableList<Int>> = buildMap(code,  size)
+    //println(map.forEach { println(it.joinToString("") { it.toString() }) })
     var dist = size + size
     var result = 0
     for (y in 0..size-SIZE) {
         val line = map[y]
-        println("sum $y ${line.sum()}")
         if (line.sum() >= SIZE) {
-            val x1 = line.indexOfFirst { it == 1 } + SIZE
+            val x1 = line.indexOfFirst { it == 1 }
             val x2 = line.indexOfLast { it == 1 }
+            println("${y+1}: line sum ${line.sum()}, ${x1+1} .. ${x2+1}")
             for (x in x1..x2) {
                 var sumY = getSumY(map, x, y)
+                //println("sumy1 ${x+1} $sumY")
                 if (sumY >= SIZE) {
-                    sumY = getSumY(map, x-SIZE, y)
+                    sumY = getSumY(map, x+SIZE-1, y)
+                    //println("sumy2 ${x+SIZE-1+1} $sumY")
                     if (sumY >= SIZE) {
-                        if ((x-SIZE + y) < dist) {
-                            dist = x-SIZE + y
-                            result = 10000 * (x-SIZE) + y
+                        if ((x + y) < dist) {
+                            dist = x + y
+                            result = 10000 * x + y
                         }
-                        println("found $sumY $y $x $x1 $x2")
+                        //println("found $y $x, $x1 .. $x2, ${x-SIZE + y}")
                     }
                 }
             }
