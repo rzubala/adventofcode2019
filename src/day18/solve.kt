@@ -6,11 +6,11 @@ import utils.copy
 import utils.readInput
 
 typealias MatrixChar = MutableList<MutableList<Char>>
-
 fun main() {
     var starts = mutableListOf<Point>()
     val map = mutableListOf<MutableList<Char>>()
-    readInput("src/day18/input2.data").forEach { l ->
+    val data = readInput("src/day18/input.data").toMutableList()
+    data.forEach { l ->
         val row = mutableListOf<Char>()
         map.add(row)
         l.toCharArray().forEach { v ->
@@ -20,16 +20,31 @@ fun main() {
             starts.add(Point(x, map.size - 1))
         }
     }
-    println(calculate(map, starts, mutableListOf()))
+    println("Part1: ${calculate(map, starts, mutableListOf())}")
 
-    //Part1 4248
-    //Part2 1878
+    val ref = Point(starts[0].x, starts[0].y)
+    starts.clear()
+    starts.apply {
+        add(Point(ref.x-1, ref.y-1))
+        add(Point(ref.x+1, ref.y-1))
+        add(Point(ref.x-1, ref.y+1))
+        add(Point(ref.x+1, ref.y+1))
+    }
+    map[ref.x][ref.y] = '#'
+    map[ref.x-1][ref.y] = '#'
+    map[ref.x+1][ref.y] = '#'
+    map[ref.x][ref.y-1] = '#'
+    map[ref.x][ref.y+1] = '#'
+    starts.forEach { map[it.x][it.y] = '@' }
+    cache.clear()
+    println("Part2: ${calculate(map, starts, mutableListOf())}")
 }
 
 typealias PointsWithKeys = Pair<List<Point>, String>
-val seen = mutableMapOf<PointsWithKeys, Int>()
+val cache = mutableMapOf<PointsWithKeys, Int>()
+
 fun calculate(map: MatrixChar, points: List<Point>, myKeys: MutableList<Char>): Int {
-    seen[PointsWithKeys(points, myKeys.toSortedString())]?.let {
+    cache[PointsWithKeys(points, myKeys.toSortedString())]?.let {
         return it
     }
     var result = 0
@@ -53,7 +68,7 @@ fun calculate(map: MatrixChar, points: List<Point>, myKeys: MutableList<Char>): 
         }
         result = positions.min()!!
     }
-    seen[PointsWithKeys(points, myKeys.toSortedString())] = result
+    cache[PointsWithKeys(points, myKeys.toSortedString())] = result
     return result
 }
 
