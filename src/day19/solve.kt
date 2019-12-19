@@ -6,13 +6,15 @@ import utils.copy
 import utils.readInput
 
 const val LAST_INDEX = 49
-
+const val SIZE = 100
 
 fun main() {
     val code = readInput("src/day19/input.data")[0].split(",").map { it.toLong() }
 
-    val map: MutableList<MutableList<Int>> = buildMap(code, LAST_INDEX)
+    //Part1
+    val map: MutableList<MutableList<Int>> = buildMap(code, LAST_INDEX )
     println("sum ${ map.sumBy { it.sum() }}")
+
 }
 
 private fun buildMap(code: List<Long>, size: Int): MutableList<MutableList<Int>> {
