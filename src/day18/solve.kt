@@ -1,60 +1,118 @@
 package day18
 
 import day10.Point
-import day17.Directions
-import day17.up
+import day17.*
+import utils.copy
 import utils.readInput
-import java.lang.IllegalStateException
+
+typealias MatrixChar = MutableList<MutableList<Char>>
 
 fun main() {
-    val keysMap: MutableMap<Char, Point> = mutableMapOf()
-    val doorsMap: MutableMap<Char, Point> = mutableMapOf()
-    var start: Point? = null
+    var starts = mutableListOf<Point>()
     val map = mutableListOf<MutableList<Char>>()
-    var y = 0
-    val data = readInput("src/day18/test.data").forEach { l ->
+    readInput("src/day18/input2.data").forEach { l ->
         val row = mutableListOf<Char>()
         map.add(row)
-        var x = 0
         l.toCharArray().forEach { v ->
             row.add(v)
-            when {
-                v.isLowerCase() -> keysMap[v] = Point(x,y)
-                v.isUpperCase() -> doorsMap[v] = Point(x,y)
-                v == '@' -> start = Point(x,y)
-            }
-            x++
         }
-        y++
+        row.mapIndexed { i: Int, c: Char ->  if (c == '@') i else null}.filterNotNull().toList().forEach { x ->
+            starts.add(Point(x, map.size - 1))
+        }
     }
-    map.print()
+    println(calculate(map, starts, mutableListOf()))
 
-    //TODO this puzzle was solved in Python script but it will be coded in Kotlin as well later
     //Part1 4248
     //Part2 1878
 }
 
-fun List<List<Char>>.findKeys(position: Point, foundKeys: MutableList<Char>) {
-    val up = getValue(position.up())
+typealias PointsWithKeys = Pair<List<Point>, String>
+val seen = mutableMapOf<PointsWithKeys, Int>()
+fun calculate(map: MatrixChar, points: List<Point>, myKeys: MutableList<Char>): Int {
+    seen[PointsWithKeys(points, myKeys.toSortedString())]?.let {
+        return it
+    }
+    var result = 0
+    val keys = collect4(map, points, myKeys)
+    if (keys.isNotEmpty()) {
+        val positions = mutableListOf<Int>()
+        for (keyItem in keys.entries) {
+            val key = keyItem.key
+            val point = keyItem.value.first
+            val distance = keyItem.value.second
+            val robot = keyItem.value.third
+            val npoints = mutableListOf<Point>()
+            points.forEachIndexed { i, p ->
+                if (i == robot) {
+                    npoints.add(point)
+                } else {
+                    npoints.add(p)
+                }
+            }
+            positions.add(distance + calculate(map, npoints, myKeys.copy().apply { add(key) }))
+        }
+        result = positions.min()!!
+    }
+    seen[PointsWithKeys(points, myKeys.toSortedString())] = result
+    return result
 }
 
-fun MutableList<MutableList<Char>>.findKey(position: Point, path: MutableList<Directions>, keys: MutableList<Char>) {
-    val up = getValue(position.up())
-    var moveUp = true
-    when {
-        up.isLowerCase() -> keys.add(up)
-        up.isUpperCase() -> moveUp = keys.contains(up.toLowerCase())
-        up == '#' -> moveUp = false
-    }
-    if (moveUp) {
-        path.add(Directions.U)
-        findKey(position.up(), path, keys)
-    }
+fun List<Char>.toSortedString() = sorted().joinToString("") { it.toString() }
 
-    if (path.isEmpty()) {
-        throw IllegalStateException("No move left")
+typealias PointWithDistanceWithRobot = Triple<Point, Int, Int>
+fun collect4(map: MatrixChar, points: List<Point>, myKeys: MutableList<Char>): Map<Char, PointWithDistanceWithRobot> {
+    val resultKeyData = mutableMapOf<Char, PointWithDistanceWithRobot>()
+    points.forEachIndexed { i, point ->
+        collectKeys(map, point, myKeys).forEach { data ->
+            resultKeyData[data.key] = PointWithDistanceWithRobot(data.value.first, data.value.second, i)
+        }
     }
-    val last = path.removeAt(path.size - 1)
+    return resultKeyData
+}
+
+typealias PointWithDistance = Pair<Point, Int>
+fun collectKeys(map: MatrixChar, point: Point, myKeys: MutableList<Char>): Map<Char, PointWithDistance> {
+    val resultKeyData = mutableMapOf<Char, PointWithDistance>()
+    val deque = mutableListOf<Point>()
+    deque.add(point)
+    val distances = mutableMapOf<Point, Int>()
+    distances[point] = 0
+    while (deque.isNotEmpty()) {
+        val current = deque.removeAt(0)
+        for (n in current.neighbors()) {
+            run neighbors@{
+                val value = map.getValue(n)
+                if (value.isWall()) {
+                    return@neighbors
+                }
+                distances[n]?.let {
+                    return@neighbors
+                }
+                distances[n] = distances[current]!!.plus(1)
+                if (value.isUpperCase() && !myKeys.contains(value.toLowerCase())) {
+                    return@neighbors
+                }
+                if (value.isLowerCase() && !myKeys.contains(value)) {
+                    resultKeyData[value] = PointWithDistance(n, distances[n]!!)
+                } else {
+                    deque.add(n)
+                }
+            }
+        }
+    }
+    return resultKeyData
+}
+
+fun Char.isWall() = this == '#'
+
+fun Point.neighbors(): List<Point> {
+    val point = this
+    return mutableListOf<Point>().apply {
+        add(point.up())
+        add(point.left())
+        add(point.down())
+        add(point.right())
+    }
 }
 
 fun List<List<Char>>.getValue(point: Point): Char {
@@ -64,11 +122,4 @@ fun List<List<Char>>.getValue(point: Point): Char {
         return '#'
     }
     return this[y][x]
-}
-
-fun List<List<Char>>.print() {
-    forEach { row ->
-        row.forEach { print(it.toString()) }
-        println()
-    }
 }
