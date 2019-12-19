@@ -9,13 +9,16 @@ const val LAST_INDEX = 49
 const val SIZE = 100
 const val LAST_INDEX_2 = SIZE.times(10) + SIZE
 
+typealias MatrixInt = MutableList<MutableList<Int>>
+
 fun main() {
     val code = readInput("src/day19/input.data")[0].split(",").map { it.toLong() }
     //Part1
-    val map1: MutableList<MutableList<Int>> = buildMap(code, LAST_INDEX )
+    val map1: MatrixInt = buildMap(code, LAST_INDEX )
     println("Part1 ${ map1.sumBy { it.sum() }}")
+
     //Part2
-    val map: MutableList<MutableList<Int>> = buildMap(code,  LAST_INDEX_2)
+    val map: MatrixInt = buildMap(code,  LAST_INDEX_2)
     var dist = LAST_INDEX_2.times(2)
     var result = 0
     val cache: MutableMap<Point, Int> = mutableMapOf()
@@ -41,7 +44,7 @@ fun main() {
     println("Part2 $result")
 }
 
-fun getSumY(map: MutableList<MutableList<Int>>, x: Int, y: Int, cache: MutableMap<Point, Int>): Int {
+fun getSumY(map: MatrixInt, x: Int, y: Int, cache: MutableMap<Point, Int>): Int {
     cache[Point(x,y)]?.let{
         return it
     }
@@ -61,8 +64,8 @@ fun getSumY(map: MutableList<MutableList<Int>>, x: Int, y: Int, cache: MutableMa
     return sum
 }
 
-private fun buildMap(code: List<Long>, size: Int): MutableList<MutableList<Int>> {
-    val map: MutableList<MutableList<Int>> = mutableListOf()
+private fun buildMap(code: List<Long>, size: Int): MatrixInt {
+    val map: MatrixInt = mutableListOf()
     var lastX = 0
     (0..size).forEach { y ->
         val row = MutableList(size) { 0 }
