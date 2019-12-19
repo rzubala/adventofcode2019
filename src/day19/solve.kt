@@ -11,19 +11,26 @@ const val LAST_INDEX = 49
 fun main() {
     val code = readInput("src/day19/input.data")[0].split(",").map { it.toLong() }
 
-    var sum = 0L
-    (0..LAST_INDEX).forEach { y ->
-        (0..LAST_INDEX).forEach { x->
-            val position = Point(x,y)
+    val map: MutableList<MutableList<Int>> = buildMap(code, LAST_INDEX)
+    println("sum ${ map.sumBy { it.sum() }}")
+}
+
+private fun buildMap(code: List<Long>, size: Int): MutableList<MutableList<Int>> {
+    val map: MutableList<MutableList<Int>> = mutableListOf()
+    (0..size).forEach { y ->
+        val row = mutableListOf<Int>()
+        map.add(row)
+        (0..size).forEach { x ->
+            val position = Point(x, y)
             var isX = true
             IntCode(code.copy()).run({
                 val value = if (isX) position.x.toLong() else position.y.toLong()
                 isX = !isX
                 value
             }) { out ->
-                sum += out
+                row.add(out.toInt())
             }
         }
     }
-    println("sum $sum")
+    return map
 }
