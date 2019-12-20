@@ -2,6 +2,7 @@ package day20
 
 import day10.Point
 import day18.getValue
+import day18.isWall
 import day18.neighbors
 import utils.readInput
 import java.lang.IllegalStateException
@@ -11,11 +12,60 @@ const val WALL = '#'
 
 typealias MatrixChar = MutableList<MutableList<Char>>
 fun main() {
-    val data = readInput("src/day20/test.data")
+    val data = readInput("src/day20/input.data")
     val gates: GatePoints = mutableMapOf()
     val map = buildMap(data, gates)
     map.print()
     gates.print()
+
+    findPaths(map, gates, gates["AA"]!![0])
+}
+
+fun findPaths(map: MatrixChar, gates: GatePoints, point: Point) {
+    val deque = mutableListOf<Point>()
+    deque.add(point)
+    val distances = mutableMapOf<Point, Int>()
+    val toZ = mutableListOf<Int>()
+    distances[point] = 0
+    while (deque.isNotEmpty()) {
+        val current = deque.removeAt(0)
+        //println("Current: $current")
+        for (n in current.neighbors()) {
+            run neighbors@{
+                val ch = map.getValue(n)
+                if (ch.isWall() || ch.isUpperCase()) {
+                    //println("   Wall $ch")
+                    return@neighbors
+                }
+                val currentDist = distances[current]!!
+                distances[n]?.let {
+                    if (it < currentDist.plus(1)) {
+                        return@neighbors
+                    }
+                    //println("been $n: $it")
+                    //println("   Exists $ch")
+                }
+                distances[n] = currentDist.plus(1)
+                if (gates.isEnd(n)) {
+                    println("Z")
+                    toZ.add(distances[n]!!)
+                    return@neighbors
+                }
+                println("$n: ${distances[n]}")
+                if (ch == PATH) {
+                    if (gates.isGate(n)) {
+                        val nn = gates.next(n)
+                        deque.add(Point(nn.x, nn.y))
+                        distances[nn] = distances[n]!!.plus(1)
+                    } else {
+                        //println("   Add $n to deque")
+                        deque.add(Point(n.x, n.y))
+                    }
+                }
+            }
+        }
+    }
+    println(toZ.toString())
 }
 
 typealias GatePoints = MutableMap<String, MutableList<Point>>
@@ -75,7 +125,7 @@ fun buildMap(data: List<String>, gates: GatePoints): MatrixChar {
 fun key(x: Char, y: Char): String =
     mutableListOf(x, y).apply{
         sort()
-    }.toString()
+    }.joinToString (""){ it.toString() }
 
 fun GatePoints.add(c: Char, h: Char, p: Point) {
     val key = key(c, h)
@@ -87,6 +137,37 @@ fun GatePoints.add(c: Char, h: Char, p: Point) {
         return
     }
     put(key, mutableListOf(p))
+}
+
+fun GatePoints.isGate(point: Point): Boolean {
+    for (key in keys) {
+        if (get(key)?.contains(point)!!) {
+            return true
+        }
+    }
+    return false
+}
+
+fun GatePoints.isEnd(point: Point): Boolean {
+    for (key in keys) {
+        if (get(key)?.contains(point)!!) {
+            return "ZZ" == key
+        }
+    }
+    return false
+}
+
+fun GatePoints.next(point: Point): Point {
+    for (key in keys) {
+        val list = get(key)
+        if (list?.contains(point)!!) {
+            var index = list.indexOf(point)
+            index = (index + 1)%2
+            println("$key")
+            return list[index]
+        }
+    }
+    throw IllegalStateException("Empty gate $point")
 }
 
 fun GatePoints.print() {
