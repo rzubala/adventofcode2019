@@ -133,7 +133,7 @@ fun Point.neighbors(): List<Point> {
 fun List<List<Char>>.getValue(point: Point): Char {
     val x = point.x
     val y = point.y
-    if (x < 0 || y < 0 || y >= size || x >= this[0].size) {
+    if (x < 0 || y < 0 || y >= size || x >= this[y].size) {
         return '#'
     }
     return this[y][x]
