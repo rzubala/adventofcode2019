@@ -1,6 +1,10 @@
 package day20
 
 import day10.Point
+import day17.down
+import day17.left
+import day17.right
+import day17.up
 import day18.getValue
 import day18.isWall
 import day18.neighbors
@@ -10,76 +14,67 @@ import java.util.Collections.min
 
 const val PATH = '.'
 const val MAX_PATH = 7000
-const val MAX_DEPTH = 100
+
+data class Point3(var x: Int, var y: Int, var z: Int) {
+    constructor(p: Point, z: Int) : this(p.x, p.y, z)
+}
 
 typealias MatrixChar = MutableList<MutableList<Char>>
 fun main() {
     val data = readInput("src/day20/input.data")
     val gates: GatePoints = mutableMapOf()
     val map = buildMap(data, gates)
-    //map.print()
-    //gates.print()
     val start = gates["AA"]!![0]
     println("Start $start")
-    println("Part1 " + findPath(map, gates, PointLevel(start, 0)) { _, _, lvl -> lvl })
-    println("Part2 " + findPath(map, gates, PointLevel(start, 0)) { m, p, lvl -> getLevel(m, p, lvl) })
+    println("Part1 " + findPath(map, gates, Point3(start, 0)) { _, _, lvl -> lvl })
+    println("Part2 " + findPath(map, gates, Point3(start, 0)) { m, p, lvl -> getLevel(m, p, lvl) })
 }
 
-typealias PointLevel = Pair<Point, Int>
-
-fun findPath(map: MatrixChar, gates: GatePoints, point: PointLevel, nextLevel: (map: MatrixChar, p: Point, lvl: Int) -> Int): Int {
-    val deque = mutableListOf<PointLevel>()
-    deque.add(PointLevel(point.first.copy(), point.second))
-    val distances = mutableMapOf<PointLevel, Int>()
+fun findPath(map: MatrixChar, gates: GatePoints, point: Point3, nextLevel: (map: MatrixChar, p: Point, lvl: Int) -> Int): Int {
+    val deque = mutableListOf<Point3>()
+    deque.add(point.copy())
+    val distances = mutableMapOf<Point3, Int>()
     distances[point] = 0
     val path = mutableListOf<Int>()
     while(deque.isNotEmpty()) {
         val current = deque.removeAt(0)
-        val lvl = current.second
-        for (n in current.first.neighbors()) {
+        for (n in current.neighbors()) {
             run neighbors@{
-                val ch = map.getValue(n)
+                val ch = map.getValue(n.twoD())
                 if (ch.isWall() || ch.isUpperCase()) {
                     return@neighbors
                 }
-                if (gates.isKey(n, "AA")) {
+                if (gates.isKey(n.twoD(), "AA")) {
                     return@neighbors
                 }
                 val currentDist = distances[current]!!
-                if (gates.isKey(n, "ZZ")) {
-                    if (lvl != 0) {
+                if (gates.isKey(n.twoD(), "ZZ")) {
+                    if (n.z > 0) {
                         return@neighbors
                     }
-                    //println("Found Z")
                     path.add(currentDist+1)
                     return@neighbors
                 }
-                val dist = distances[PointLevel(n, lvl)]
+                val dist = distances[n]
                 dist?.let {
-                    if (it < currentDist + 1) {
+                    if (it <= currentDist ) {
                         return@neighbors
                     }
                 }
-                distances[PointLevel(n, lvl)] = currentDist + 1
-
-                if (distances[PointLevel(n, lvl)]!! > MAX_PATH) {
+                if (currentDist > MAX_PATH) {
                     return@neighbors
                 }
-                if (lvl > MAX_DEPTH) {
-                    return@neighbors
-                }
-
+                distances[n] = currentDist + 1
                 if (ch == PATH) {
-                    deque.add(PointLevel(n, lvl))
-                    //println("Add $n")
-                    if (gates.isGate(n)) {
-                        val nn = gates.next(n)
-                        val nLvl = nextLevel(map, nn, lvl)
+                    deque.add(n.copy())
+                    if (gates.isGate(n.twoD())) {
+                        val nn = gates.next(n.twoD())
+                        val nLvl = nextLevel(map, n.twoD(), n.z)
                         if (nLvl < 0) {
                             return@neighbors
                         }
-                        deque.add(PointLevel(nn, nLvl))
-                        distances[PointLevel(nn, nLvl)] = distances[PointLevel(n, lvl)]!! + 1
+                        deque.add(Point3(nn, nLvl))
+                        distances[Point3(nn, nLvl)] = distances[n]!! + 1
                     }
                 }
             }
@@ -199,14 +194,15 @@ fun GatePoints.next(point: Point): Point {
     throw IllegalStateException("Empty gate $point")
 }
 
-fun GatePoints.print() {
-    keys.forEach{
-        println("$it -> ${get(it).toString()}")
+fun Point3.neighbors(): List<Point3> {
+    val point = this
+    val z = point.z
+    return mutableListOf<Point3>().apply {
+        add(Point3(point.twoD().up(), z))
+        add(Point3(point.twoD().left(), z))
+        add(Point3(point.twoD().down(), z))
+        add(Point3(point.twoD().right(), z))
     }
 }
 
-fun MatrixChar.print() {
-    forEach { line ->
-        println(line.joinToString (""){ it.toString() })
-    }
-}
+fun Point3.twoD(): Point = Point(x, y)
