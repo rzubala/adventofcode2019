@@ -75,6 +75,9 @@ fun findPath(map: MatrixChar, gates: GatePoints, point: PointLevel, nextLevel: (
                     if (gates.isGate(n)) {
                         val nn = gates.next(n)
                         val nLvl = nextLevel(map, nn, lvl)
+                        if (nLvl < 0) {
+                            return@neighbors
+                        }
                         deque.add(PointLevel(nn, nLvl))
                         distances[PointLevel(nn, nLvl)] = distances[PointLevel(n, lvl)]!! + 1
                     }
