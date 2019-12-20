@@ -9,6 +9,8 @@ import java.lang.IllegalStateException
 import java.util.Collections.min
 
 const val PATH = '.'
+const val MAX_PATH = 7000
+const val MAX_DEPTH = 100
 
 typealias MatrixChar = MutableList<MutableList<Char>>
 fun main() {
@@ -19,58 +21,70 @@ fun main() {
     //gates.print()
     val start = gates["AA"]!![0]
     println("Start $start")
-    //println("Part1 ${go1(map, gates, start, mutableSetOf<Point>().apply{add(start.copy())}, 0)}")
-    println("Part2 ${go2(map, gates, PointLevel(start, 0), mutableSetOf<PointLevel>().apply{add(PointLevel(start.copy(), 0))}, 0)}")
+    println("Part1 " + findPath(map, gates, PointLevel(start, 0)) { _, _, lvl -> lvl })
+    println("Part2 " + findPath(map, gates, PointLevel(start, 0)) { m, p, lvl -> getLevel(m, p, lvl) })
 }
 
 typealias PointLevel = Pair<Point, Int>
-fun go2(map: MatrixChar, gates: GatePoints, point: PointLevel, seen: Set<PointLevel>, dist: Int): Int {
-    val list = mutableListOf<Int>()
-    val pLvl = point.second
-    for (n in point.first.neighbors()) {
-        val ch = map.getValue(n)
-        if (ch.isWall() || ch.isUpperCase()) {
-            continue
-        }
-        if (seen.contains(PointLevel(n, pLvl))) {
-            continue
-        }
-        if (gates.isEnd(n)) {
-            println("End at $n: ${dist+1} $pLvl")
-            if (pLvl != 0) {
-                return -1
-            }
-            return dist + 1
-        }
-        var res = -1
-        if (ch == PATH) {
-            res = if (gates.isGate(n)) {
-                val nn = gates.next(n)
-                val nLvl = getLevel(map, nn, pLvl)
-                if (nLvl < 0 || nLvl > 10) {
-                    return res
+
+fun findPath(map: MatrixChar, gates: GatePoints, point: PointLevel, nextLevel: (map: MatrixChar, p: Point, lvl: Int) -> Int): Int {
+    val deque = mutableListOf<PointLevel>()
+    deque.add(PointLevel(point.first.copy(), point.second))
+    val distances = mutableMapOf<PointLevel, Int>()
+    distances[point] = 0
+    val path = mutableListOf<Int>()
+    while(deque.isNotEmpty()) {
+        val current = deque.removeAt(0)
+        val lvl = current.second
+        for (n in current.first.neighbors()) {
+            run neighbors@{
+                val ch = map.getValue(n)
+                if (ch.isWall() || ch.isUpperCase()) {
+                    return@neighbors
                 }
-                go2(map, gates, PointLevel(nn, nLvl), mutableSetOf<PointLevel>().apply{
-                    addAll(seen);
-                    add(PointLevel(n.copy(), pLvl));
-                    add(PointLevel(nn.copy(), nLvl))
-                }, dist + 2)
-            } else {
-                go2(map, gates, PointLevel(n, pLvl), mutableSetOf<PointLevel>().apply{
-                    addAll(seen);
-                    add(PointLevel(n.copy(), pLvl))
-                }, dist + 1)
+                if (gates.isKey(n, "AA")) {
+                    return@neighbors
+                }
+                val currentDist = distances[current]!!
+                if (gates.isKey(n, "ZZ")) {
+                    if (lvl != 0) {
+                        return@neighbors
+                    }
+                    //println("Found Z")
+                    path.add(currentDist+1)
+                    return@neighbors
+                }
+                val dist = distances[PointLevel(n, lvl)]
+                dist?.let {
+                    if (it < currentDist + 1) {
+                        return@neighbors
+                    }
+                }
+                distances[PointLevel(n, lvl)] = currentDist + 1
+
+                if (distances[PointLevel(n, lvl)]!! > MAX_PATH) {
+                    return@neighbors
+                }
+                if (lvl > MAX_DEPTH) {
+                    return@neighbors
+                }
+
+                if (ch == PATH) {
+                    deque.add(PointLevel(n, lvl))
+                    //println("Add $n")
+                    if (gates.isGate(n)) {
+                        val nn = gates.next(n)
+                        val nLvl = nextLevel(map, nn, lvl)
+                        deque.add(PointLevel(nn, nLvl))
+                        distances[PointLevel(nn, nLvl)] = distances[PointLevel(n, lvl)]!! + 1
+                    }
+                }
             }
         }
-        if (res > 0) {
-            list.add(res)
-        }
     }
-    if (list.isEmpty()) {
-        return -1
-    }
-    return min(list)
+    return min(path)
 }
+
 
 fun getLevel(map: MutableList<MutableList<Char>>, nn: Point, lvl: Int): Int {
     val line = map[nn.y]
@@ -79,40 +93,6 @@ fun getLevel(map: MutableList<MutableList<Char>>, nn: Point, lvl: Int): Int {
         return lvl - 1
     }
     return lvl + 1
-}
-
-
-fun go1(map: MatrixChar, gates: GatePoints, point: Point, seen: Set<Point>, dist: Int): Int {
-    val list = mutableListOf<Int>()
-    for (n in point.neighbors()) {
-        val ch = map.getValue(n)
-        if (ch.isWall() || ch.isUpperCase()) {
-            continue
-        }
-        if (seen.contains(n)) {
-            continue
-        }
-        if (gates.isEnd(n)) {
-            println("End at $n: ${dist+1}")
-            return dist + 1
-        }
-        var res = -1
-        if (ch == PATH) {
-            res = if (gates.isGate(n)) {
-                val nn = gates.next(n)
-                go1(map, gates, nn, mutableSetOf<Point>().apply{addAll(seen);add(n.copy());add(nn.copy())}, dist + 2)
-            } else {
-                go1(map, gates, n, mutableSetOf<Point>().apply{addAll(seen);add(n.copy())}, dist + 1)
-            }
-        }
-        if (res > 0) {
-            list.add(res)
-        }
-    }
-    if (list.isEmpty()) {
-        return -1
-    }
-    return min(list)
 }
 
 typealias GatePoints = MutableMap<String, MutableList<Point>>
@@ -195,10 +175,10 @@ fun GatePoints.isGate(point: Point): Boolean {
     return false
 }
 
-fun GatePoints.isEnd(point: Point): Boolean {
+fun GatePoints.isKey(point: Point, k: String): Boolean {
     for (key in keys) {
         if (get(key)?.contains(point)!!) {
-            return "ZZ" == key
+            return k == key
         }
     }
     return false
