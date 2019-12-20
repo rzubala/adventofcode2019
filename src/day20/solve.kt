@@ -19,10 +19,70 @@ fun main() {
     //gates.print()
     val start = gates["AA"]!![0]
     println("Start $start")
-    println("Part1 ${go(map, gates, start, mutableSetOf<Point>().apply{add(start.copy())}, 0)}")
+    //println("Part1 ${go1(map, gates, start, mutableSetOf<Point>().apply{add(start.copy())}, 0)}")
+    println("Part2 ${go2(map, gates, PointLevel(start, 0), mutableSetOf<PointLevel>().apply{add(PointLevel(start.copy(), 0))}, 0)}")
 }
 
-fun go(map: MatrixChar, gates: GatePoints, point: Point, seen: Set<Point>, dist: Int): Int {
+typealias PointLevel = Pair<Point, Int>
+fun go2(map: MatrixChar, gates: GatePoints, point: PointLevel, seen: Set<PointLevel>, dist: Int): Int {
+    val list = mutableListOf<Int>()
+    val pLvl = point.second
+    for (n in point.first.neighbors()) {
+        val ch = map.getValue(n)
+        if (ch.isWall() || ch.isUpperCase()) {
+            continue
+        }
+        if (seen.contains(PointLevel(n, pLvl))) {
+            continue
+        }
+        if (gates.isEnd(n)) {
+            println("End at $n: ${dist+1} $pLvl")
+            if (pLvl != 0) {
+                return -1
+            }
+            return dist + 1
+        }
+        var res = -1
+        if (ch == PATH) {
+            res = if (gates.isGate(n)) {
+                val nn = gates.next(n)
+                val nLvl = getLevel(map, nn, pLvl)
+                if (nLvl < 0 || nLvl > 10) {
+                    return res
+                }
+                go2(map, gates, PointLevel(nn, nLvl), mutableSetOf<PointLevel>().apply{
+                    addAll(seen);
+                    add(PointLevel(n.copy(), pLvl));
+                    add(PointLevel(nn.copy(), nLvl))
+                }, dist + 2)
+            } else {
+                go2(map, gates, PointLevel(n, pLvl), mutableSetOf<PointLevel>().apply{
+                    addAll(seen);
+                    add(PointLevel(n.copy(), pLvl))
+                }, dist + 1)
+            }
+        }
+        if (res > 0) {
+            list.add(res)
+        }
+    }
+    if (list.isEmpty()) {
+        return -1
+    }
+    return min(list)
+}
+
+fun getLevel(map: MutableList<MutableList<Char>>, nn: Point, lvl: Int): Int {
+    val line = map[nn.y]
+    val size = line.size
+    if (nn.x == 2 || nn.x == size - 3 || nn.y == 2 || nn.y == map.size - 3) {
+        return lvl - 1
+    }
+    return lvl + 1
+}
+
+
+fun go1(map: MatrixChar, gates: GatePoints, point: Point, seen: Set<Point>, dist: Int): Int {
     val list = mutableListOf<Int>()
     for (n in point.neighbors()) {
         val ch = map.getValue(n)
@@ -40,9 +100,9 @@ fun go(map: MatrixChar, gates: GatePoints, point: Point, seen: Set<Point>, dist:
         if (ch == PATH) {
             res = if (gates.isGate(n)) {
                 val nn = gates.next(n)
-                go(map, gates, nn, mutableSetOf<Point>().apply{addAll(seen);add(n.copy());add(nn.copy())}, dist + 2)
+                go1(map, gates, nn, mutableSetOf<Point>().apply{addAll(seen);add(n.copy());add(nn.copy())}, dist + 2)
             } else {
-                go(map, gates, n, mutableSetOf<Point>().apply{addAll(seen);add(n.copy())}, dist + 1)
+                go1(map, gates, n, mutableSetOf<Point>().apply{addAll(seen);add(n.copy())}, dist + 1)
             }
         }
         if (res > 0) {
