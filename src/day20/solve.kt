@@ -15,18 +15,14 @@ fun main() {
     val data = readInput("src/day20/input.data")
     val gates: GatePoints = mutableMapOf()
     val map = buildMap(data, gates)
-    map.print()
-    gates.print()
-
-    println(gates["AA"]!![0])
-
+    //map.print()
+    //gates.print()
     val start = gates["AA"]!![0]
+    println("Start $start")
     println("Part1 ${go(map, gates, start, mutableSetOf<Point>().apply{add(start.copy())}, 0)}")
 }
 
 fun go(map: MatrixChar, gates: GatePoints, point: Point, seen: Set<Point>, dist: Int): Int {
-    println("Point $point $dist")
-
     val list = mutableListOf<Int>()
     for (n in point.neighbors()) {
         val ch = map.getValue(n)
@@ -36,9 +32,8 @@ fun go(map: MatrixChar, gates: GatePoints, point: Point, seen: Set<Point>, dist:
         if (seen.contains(n)) {
             continue
         }
-        println("  $n")
         if (gates.isEnd(n)) {
-            println("Z")
+            println("End at $n: ${dist+1}")
             return dist + 1
         }
         var res = -1
@@ -57,7 +52,6 @@ fun go(map: MatrixChar, gates: GatePoints, point: Point, seen: Set<Point>, dist:
     if (list.isEmpty()) {
         return -1
     }
-    println(list.toString())
     return min(list)
 }
 
@@ -75,6 +69,9 @@ fun buildMap(data: List<String>, gates: GatePoints): MatrixChar {
             val c = iter.second
             val p = Point(x,y)
             for (n in p.neighbors()) {
+                if (n.x < p.x || n.y < p.y) {
+                    continue
+                }
                 val h = map.getValue(n)
                 if (h.isUpperCase()) {
                     if (p.x == n.x) {
@@ -115,10 +112,7 @@ fun buildMap(data: List<String>, gates: GatePoints): MatrixChar {
     return map
 }
 
-fun key(x: Char, y: Char): String =
-    mutableListOf(x, y).apply{
-        sort()
-    }.joinToString (""){ it.toString() }
+fun key(x: Char, y: Char): String = "$x$y"
 
 fun GatePoints.add(c: Char, h: Char, p: Point) {
     val key = key(c, h)
