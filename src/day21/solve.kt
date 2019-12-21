@@ -25,30 +25,28 @@ fun part2(code: List<Long>) {
         "AND D J\n"
 
     val inputCode = toIntCode(springCode + "RUN\n").iterator()
-    println("Part2 ${IntCode(code.copy()).run({
-        inputCode.next()
-    }) { out ->
-        //print(out.toChar())
-    }
-    }")
+    println("Part2 ${runCode(code.copy(), inputCode.iterator())}")
 }
 
 fun part1(code: List<Long>) {
     val springCode: String =
-                "NOT A J\n" +
-                "NOT B T\n" +
-                "OR T J\n" +
-                "NOT C T\n" +
-                "OR T J\n" +
-                "AND D J\n"
+        "NOT A J\n" +
+        "NOT B T\n" +
+        "OR T J\n" +
+        "NOT C T\n" +
+        "OR T J\n" +
+        "AND D J\n"
     val inputCode = toIntCode(springCode + "WALK\n").iterator()
-    println("Part1 ${IntCode(code.copy()).run({
-        inputCode.next()
+    println("Part1 ${runCode(code.copy(), inputCode.iterator())}")
+}
+
+fun runCode(code: List<Long>, it: Iterator<Long>): Long =
+    IntCode(code.copy()).run({
+        it.next()
     }) { out ->
         //print(out.toChar())
     }
-    }")
-}
+
 
 fun toIntCode(program: String): List<Long> {
     return program.toCharArray().toList().map{ it.toInt().toLong() }
