@@ -9,35 +9,37 @@ const val INC = "deal with increment"
 const val NEW = "deal into new stack"
 const val CUT = "cut"
 
-const val CARDS = 10007
-//const val CARDS = 10
+const val CARDS = 10007L
+//const val CARDS = 119315717514047
+const val SHUFFLES = 101741582076661
 
 fun main() {
+    var data: MutableList<Long> = (0 until CARDS).toMutableList()
 
-    var list: MutableList<Int> = (0 until CARDS).toMutableList()
+    val operations: MutableList<(list: MutableList<Long>) -> MutableList<Long>> = mutableListOf()
 
-    val data = readInput("src/day22/input.data").forEach { line ->
-        println(line)
+    readInput("src/day22/input.data").forEach { line ->
         when {
             line.startsWith(INC) -> {
                 val num = line.drop(INC.length).trim().toInt()
-                list = inc(list, num)
-                println("inc $num")
+                operations.add { list: MutableList<Long> -> inc(list, num) }
             }
             line.startsWith(NEW) -> {
-                println("new")
-                list.reverse()
+                operations.add { list: MutableList<Long> -> reverse(list) }
             }
             line.startsWith(CUT) -> {
                 val num =line.drop(CUT.length).trim().toInt()
-                println("cut $num")
-                list = cut(list, num)
+                operations.add { list: MutableList<Long> -> cut(list, num) }
             }
             else -> throw IllegalStateException("Not known command")
         }
     }
-    //println(list.toString())
-    println("Part1 ${list.indexOf(2019)}")
+
+    operations.forEach { op ->
+        data = op(data)
+    }
+
+    println("Part1 ${data.indexOf(2019)}")
 
     test()
 }
@@ -53,8 +55,13 @@ fun test() {
 //    println(list)
 }
 
-fun inc(data: MutableList<Int>, num: Int): MutableList<Int> {
-    val list = MutableList(data.size) { 0 }
+fun reverse(data: MutableList<Long>): MutableList<Long> {
+    data.reverse()
+    return data
+}
+
+fun inc(data: MutableList<Long>, num: Int): MutableList<Long> {
+    val list = MutableList(data.size) { 0L }
     var cnt = 0
     data.forEachIndexed{ i, v ->
         list[cnt] = v
@@ -63,7 +70,7 @@ fun inc(data: MutableList<Int>, num: Int): MutableList<Int> {
     return list
 }
 
-fun cut(data: MutableList<Int>, cut: Int): MutableList<Int> {
+fun cut(data: MutableList<Long>, cut: Int): MutableList<Long> {
     var list = data
     //println(list)
     var toTake = cut
