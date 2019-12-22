@@ -52,40 +52,35 @@ fun part1(input: List<String>) {
 fun part2(input: MutableList<String>) {
     val cards = BigInteger.valueOf(CARDS2)
     val shuffles = BigInteger.valueOf(SHUFFLES)
-    val dst = BigInteger.valueOf(2020L)
-    var a = BigInteger.valueOf(1L)
-    var b = BigInteger.valueOf(0L)
+    val toFind = BigInteger.valueOf(2020L)
+    var offset = BigInteger.valueOf(0L)
+    var increment = BigInteger.valueOf(1L)
     input.reverse()
     input.forEach { line ->
         when {
             line.startsWith(INC) -> {
-                val inc = line.drop(INC.length).trim().toInt().toLong()
-                val p = pow(BigInteger.valueOf(inc), cards.minus(BigInteger.valueOf(2)), cards)
-                a = a.times(p)
-                b = b.times(p)
+                val inc = BigInteger.valueOf(line.drop(INC.length).trim().toLong())
+                val tmp = inc.inv(cards)
+                increment = increment.times(tmp)
+                offset = offset.times(tmp)
             }
             line.startsWith(NEW) -> {
-                b = b.plus(BigInteger.valueOf(1))
-                b = b.times(BigInteger.valueOf(-1))
-                a = a.times(BigInteger.valueOf(-1))
+                offset = offset.plus(BigInteger.ONE)
+                offset = offset.times(-BigInteger.ONE)
+                increment = increment.times(-BigInteger.ONE)
             }
             line.startsWith(CUT) -> {
-                val inc =line.drop(CUT.length).trim().toInt().toLong()
-                b = b.plus(BigInteger.valueOf(inc))
+                val inc =line.drop(CUT.length).trim().toLong()
+                offset = offset.plus(BigInteger.valueOf(inc))
             }
             else -> throw IllegalStateException("Not known command")
         }
-        a = a.mod(BigInteger.valueOf(CARDS2))
-        b = b.mod(BigInteger.valueOf(CARDS2))
+        increment = increment.mod(cards)
+        offset = offset.mod(cards)
     }
-    //solution from https://github.com/sophiebits/adventofcode/blob/master/2019/day22.py
-    //q
-    //aq + b
-    //a(aq+b) + b = a^2q + ab + b
-    //a(a^2q + ab + b) = a^3q + a^2b + ab + b
-    //...
-    //a^t q + b * (a^t - 1) / (a - 1)
-    val result = (pow(a, shuffles, cards) * dst + b * (pow(a, shuffles, cards) + cards.minus(BigInteger.valueOf(1)) ) * pow(a.minus(BigInteger.valueOf(1)), cards.minus(BigInteger.valueOf(2)), cards)).mod(cards)
+    val result = (increment.modPow(shuffles, cards) * toFind
+                + offset * (increment.modPow(shuffles, cards) + cards.minus(BigInteger.ONE)) * increment.minus(BigInteger.ONE).inv(cards)
+            ).mod(cards)
     println("Part2 $result")
 }
 
@@ -116,4 +111,4 @@ fun cut(data: MutableList<Long>, cut: Int): MutableList<Long> {
     return list
 }
 
-fun pow(a: BigInteger, b: BigInteger, m: BigInteger): BigInteger = a.modPow(b, m)
+fun BigInteger.inv(n: BigInteger): BigInteger = modPow(n.minus(BigInteger.TWO), n)
