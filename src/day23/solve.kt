@@ -22,11 +22,21 @@ fun main() {
         var lastY = -1L
         var start: Boolean = false
             set(value) {
-                if (!start) {
+                if (value && !start) {
                     println("NAT start ${packet.y}")
+                    run()
+                    field = value
                 }
-                field = value
             }
+        fun run() {
+            println("NAT run")
+            thread(start=true) {
+                while(true) {
+                    Thread.sleep(10)
+                    monitor()
+                }
+            }
+        }
         fun monitor() {
             if (start && packet.x > 0 && packet.y > 0 && isIdle()) {
                 data[0]?.add(packet.copy())
@@ -98,13 +108,6 @@ fun main() {
     (0..LAST).forEach { i ->
         thread(start = true) {
             Computer(i).start()
-        }
-    }
-
-    thread(start=true) {
-        while(true) {
-            Thread.sleep(10)
-            nat.monitor()
         }
     }
 }
