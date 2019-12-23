@@ -42,7 +42,6 @@ fun main() {
         fun isIdle(): Boolean {
             data.keys.forEach{ k ->
                 if (data[k]!!.isNotEmpty()) {
-                    //println("Not empty $k")
                     return false
                 }
             }
@@ -57,38 +56,22 @@ fun main() {
         val packet = Packet(-1, -1)
         fun start(): Long {
             return IntCode(code.copy()).run({
-                val i = getInput()
-                //if (i>-1) println("[$address] < $i")
-                i
+                getInput()
             }
             ) { out ->
                 when(outCnt) {
                     0 -> to = out.toInt()
-                    1 -> {
-                        if (to > LAST) {
-                            packet.x = out
-                            //println("[$address] X $outCnt $out")
-                        } else {
-                            //data[to!!]!!.add(out)
-                            packet.x = out
-                        }
-                    }
+                    1 -> packet.x = out
                     2 -> {
+                        packet.y = out
                         if (to > LAST) {
-                            //println("FOUND $to $out")
-                            packet.y = out
                             nat.packet = packet.copy()
                             nat.start = true
-                            //println("[$address] Y $outCnt $out")
                         } else {
-                            //data[to!!]!!.add(out)
-                            packet.y = out
                             data[to]?.add(packet.copy())
                         }
                     }
-
                 }
-                //println("[$address] $outCnt > $out")
                 outCnt = (outCnt + 1) % 3
             }
         }
