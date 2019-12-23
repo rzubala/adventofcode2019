@@ -20,10 +20,23 @@ fun main() {
         fun monitor() {
             x?.let { ix ->
                 y?.let { iy ->
-                    data[0]?.add(ix.toLong())
-                    data[0]?.add(iy.toLong())
+                    if (isIdle()) {
+                        data[0]?.add(ix)
+                        data[0]?.add(iy)
+                        println("NAT $iy")
+                    }
                 }
             }
+        }
+
+        fun isIdle(): Boolean {
+            data.keys.forEach{ k ->
+                if (data[k]!!.isNotEmpty()) {
+                    //println("Not empty $k")
+                    return false
+                }
+            }
+            return true
         }
     }
     val nat = Nat()
@@ -41,7 +54,7 @@ fun main() {
                 when(outCnt) {
                     0 -> to = out.toInt()
                     1 -> {
-                        if (to!! == 255) {
+                        if (to!! > 49) {
                             nat.x = out
                             //println("[$address] X $outCnt $out")
                         } else {
@@ -49,14 +62,12 @@ fun main() {
                         }
                     }
                     2 -> {
-                        if (to!! == 255) {
+                        if (to!! > 49) {
+                            println("FOUND 255 $to $out")
                             nat.y = out
                             //println("[$address] Y $outCnt $out")
                         } else {
                             data[to!!]!!.add(out)
-                        }
-                        if (to == 255) {
-                            println("FOUND 255 $out")
                         }
                     }
 
@@ -79,4 +90,12 @@ fun main() {
             Computer(i).start()
         }
     }
+
+    thread(start=true) {
+        while(true) {
+            Thread.sleep(10)
+            nat.monitor()
+        }
+    }
+
 }
