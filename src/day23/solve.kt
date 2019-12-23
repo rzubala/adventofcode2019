@@ -13,6 +13,21 @@ fun main() {
         data[i] = mutableListOf<Long>().apply { add(i.toLong()) }
     }
 
+    class Nat() {
+        var x: Long? = null
+        var y: Long? = null
+
+        fun monitor() {
+            x?.let { ix ->
+                y?.let { iy ->
+                    data[0]?.add(ix.toLong())
+                    data[0]?.add(iy.toLong())
+                }
+            }
+        }
+    }
+    val nat = Nat()
+
     class Computer(val address: Int) {
         var to: Int? = null
         var outCnt = 0
@@ -23,18 +38,19 @@ fun main() {
                 i
             }
             ) { out ->
-
                 when(outCnt) {
                     0 -> to = out.toInt()
                     1 -> {
-                        if (to!! > 49) {
+                        if (to!! == 255) {
+                            nat.x = out
                             //println("[$address] X $outCnt $out")
                         } else {
                             data[to!!]!!.add(out)
                         }
                     }
                     2 -> {
-                        if (to!! > 49) {
+                        if (to!! == 255) {
+                            nat.y = out
                             //println("[$address] Y $outCnt $out")
                         } else {
                             data[to!!]!!.add(out)
@@ -43,6 +59,7 @@ fun main() {
                             println("FOUND 255 $out")
                         }
                     }
+
                 }
                 //println("[$address] $outCnt > $out")
                 outCnt = (outCnt + 1) % 3
@@ -61,6 +78,5 @@ fun main() {
         thread(start = true) {
             Computer(i).start()
         }
-        //Thread.sleep(1)
     }
 }
