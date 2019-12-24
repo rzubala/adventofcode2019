@@ -21,9 +21,6 @@ fun main() {
             }
         }.toMutableList())
     }
-
-    //map.print()
-    //println("Go")
     part1(map.copy())
     part2(map.copy())
 }
@@ -31,21 +28,13 @@ fun main() {
 fun part2(mapOrg: MatrixBool) {
     var levels: MutableMap<Int, MatrixBool> = mutableMapOf()
     levels[0] = mapOrg
-
-    (0 until 200).forEach { i ->
+    repeat(200) {
         val newLevels = mutableMapOf<Int, MatrixBool>()
-
         val min = min(levels.keys.sorted())
         val max = max(levels.keys.sorted())
-
-        //println("\n***Iter: ${i+1} ($min $max)***")
-
         var level = 0
         do {
             val newMap = step2(levels, level)
-            //println("**** $level ****")
-            //newMap.print()
-            //println("bugs: ${newMap.bugs()}")
             if (newMap.bugs() > 0) {
                 newLevels[level] = newMap
             } else {
@@ -54,14 +43,10 @@ fun part2(mapOrg: MatrixBool) {
                 }
             }
             level++
-        } while (true);
-
+        } while (true)
         level = -1
         do {
             val newMap = step2(levels, level)
-            //println("**** $level ****")
-            //newMap.print()
-            //println("bugs: ${newMap.bugs()}")
             if (newMap.bugs() > 0) {
                 newLevels[level] = newMap
             } else {
@@ -70,11 +55,7 @@ fun part2(mapOrg: MatrixBool) {
                 }
             }
             level--
-        } while (true);
-
-        //println("\n\n AFTER ${i+1} = ${count(newLevels)}")
-        //print(newLevels)
-
+        } while (true)
         levels = newLevels
     }
     println("Part2: ${count(levels)}")
@@ -123,64 +104,52 @@ fun MatrixBool.step(): MatrixBool {
         val row = mutableListOf<Boolean>()
         map.add(row)
         for (x in (0 until get(y).size)) {
-            val b = get(y)[x]
-            val newB = when(bugsAround(x, y)) {
-                1 -> true
-                2 -> !b
-                else -> false
-            }
-            row.add(newB)
+            val bug = get(y)[x]
+            val bugsAround = bugsAround(x, y)
+            row.add(isNewBug(bugsAround, bug))
         }
     }
     return map
 }
 
 fun step2(levels: MutableMap<Int, MutableList<MutableList<Boolean>>>, level: Int): MatrixBool {
-    //println("LEVEL $level")
-
     val map = levels[level] ?: createEmpty()
     val newMap: MatrixBool = mutableListOf()
     for (y in (0 until map.size)) {
         val newRow = mutableListOf<Boolean>()
         newMap.add(newRow)
         for (x in (0 until map[y].size)) {
-            val b = map[y][x]
-            //middle element
             if (y == 2 && x == 2) {
                 newRow.add(false)
                 continue
             }
-            //around next level
             var bugsAround =
             if (((x == 1 || x == 3) && y == 2) || ((y == 1 || y == 3) && x == 2)){
-                //check outside level (inner part)
                 innerBugsAround(x, y, levels[level+1])
             } else if (x == 0 || y == 0 || x == SIZE - 1 || y == SIZE - 1) {
-                //check inner level (outside part)
                 outerBugsAround(x, y, levels[level-1])
             } else {
                 0
             }
             bugsAround += map.bugsAround(x ,y)
-
-            //println("[$level] ($x, $y) = $bugsAround")
-
-            val newB = when(bugsAround) {
-                1 -> true
-                2 -> !b
-                else -> false
-            }
-            newRow.add(newB)
+            val bug = map[y][x]
+            newRow.add(isNewBug(bugsAround, bug))
         }
     }
     return newMap
 }
 
+fun isNewBug(bugsAround: Int, bug: Boolean) = when (bugsAround) {
+                                                1 -> true
+                                                2 -> !bug
+                                                else -> false
+                                            }
+
 fun createEmpty(): MutableList<MutableList<Boolean>> = MutableList(SIZE) { MutableList(SIZE) { false } }
 
 fun innerBugsAround(x: Int, y: Int, map: MatrixBool?): Int {
     map?.let { iMap ->
-        val res = if (x == 2 && y == 1) {
+        return if (x == 2 && y == 1) {
             iMap[0].map { if(it) 1 else 0}.sum()
         } else if (x == 2 && y == 3) {
             iMap[SIZE-1].map { if(it) 1 else 0}.sum()
@@ -191,15 +160,14 @@ fun innerBugsAround(x: Int, y: Int, map: MatrixBool?): Int {
         } else {
             throw IllegalStateException("Not know $x $y")
         }
-        //println("   inner ($x, $y) = $res")
-        return res
     }
     return 0
 }
 
 fun outerBugsAround(x: Int, y: Int, map: MatrixBool?): Int {
     map?.let { iMap ->
-        val res = if (y == 0) {
+        return when {
+            y == 0 -> {
                 var cnt = iMap.getValue(2, 1)
                 if (x == 0) {
                     cnt += iMap.getValue(1, 2)
@@ -207,7 +175,8 @@ fun outerBugsAround(x: Int, y: Int, map: MatrixBool?): Int {
                     cnt += iMap.getValue(3, 2)
                 }
                 cnt
-            } else if (y == SIZE - 1) {
+            }
+            y == SIZE - 1 -> {
                 var cnt = iMap.getValue(2, 3)
                 if (x == 0) {
                     cnt += iMap.getValue(1, 2)
@@ -215,16 +184,17 @@ fun outerBugsAround(x: Int, y: Int, map: MatrixBool?): Int {
                     cnt += iMap.getValue(3, 2)
                 }
                 cnt
-            } else if (x == 0) {
+            }
+            x == 0 -> {
                 iMap.getValue(1, 2)
-            } else if (x == SIZE - 1) {
+            }
+            x == SIZE - 1 -> {
                 iMap.getValue(3, 2)
-            } else {
+            }
+            else -> {
                 throw IllegalStateException("Not know $x $y")
             }
-        //println("   outer ($x, $y) = $res")
-        return res
-
+        }
     }
     return 0
 }
@@ -252,15 +222,6 @@ fun MatrixBool.sumColumn(c: Int): Int {
     return sum
 }
 
-fun MatrixBool.print() {
-    forEach { line ->
-        line.forEach { c ->
-            print(if(c) '#' else '.')
-        }
-        println()
-    }
-}
-
 fun MatrixBool.copy(): MatrixBool {
     val map: MatrixBool = mutableListOf()
     forEach { line ->
@@ -283,12 +244,4 @@ fun count(levels: MutableMap<Int, MutableList<MutableList<Boolean>>>): Int {
         cnt += levels[k]?.bugs() ?: 0
     }
     return cnt
-}
-
-fun print(levels: MutableMap<Int, MatrixBool>) {
-    val keys = levels.keys.sorted()
-    keys.forEach { l ->
-        println("Level $l")
-        levels[l]?.print()
-    }
 }
