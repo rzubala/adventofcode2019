@@ -57,27 +57,7 @@ fun part2(map: MatrixBool) {
         }
         levels = newLevels
     }
-    println("Part2: ${count(levels)}")
-}
-
-fun MatrixBool.hash(): String {
-    var result = ""
-    forEach { line ->
-        result += line.joinToString (""){ if (it) "#" else "." }
-    }
-    return result
-}
-
-fun MatrixBool.count(): Long {
-    var sum = 0L
-    var n = 0
-    forEach { line ->
-        line.forEach { c ->
-            sum += if (c) 2.0.pow(n.toDouble()).toLong() else 0
-            n++
-        }
-    }
-    return sum
+    println("Part2: ${bugs(levels)}")
 }
 
 fun MatrixBool.step(): MatrixBool {
@@ -124,8 +104,7 @@ fun step2(levels: MutableMap<Int, MutableList<MutableList<Boolean>>>, level: Int
 fun isNewBug(bugsAround: Int, bug: Boolean) = when (bugsAround) {
                                                 1 -> true
                                                 2 -> !bug
-                                                else -> false
-                                            }
+                                                else -> false }
 
 fun createEmpty(): MutableList<MutableList<Boolean>> = MutableList(SIZE) { MutableList(SIZE) { false } }
 
@@ -220,7 +199,27 @@ fun MatrixBool.bugs(): Int {
     return sum
 }
 
-fun count(levels: MutableMap<Int, MutableList<MutableList<Boolean>>>): Int {
+fun MatrixBool.hash(): String {
+    var result = ""
+    forEach { line ->
+        result += line.joinToString (""){ if (it) "#" else "." }
+    }
+    return result
+}
+
+fun MatrixBool.count(): Long {
+    var sum = 0L
+    var n = 0
+    forEach { line ->
+        line.forEach { c ->
+            sum += if (c) 2.0.pow(n.toDouble()).toLong() else 0
+            n++
+        }
+    }
+    return sum
+}
+
+fun bugs(levels: MutableMap<Int, MutableList<MutableList<Boolean>>>): Int {
     var cnt = 0
     levels.keys.forEach{ k ->
         cnt += levels[k]?.bugs() ?: 0
