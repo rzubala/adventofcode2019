@@ -25,42 +25,6 @@ fun main() {
     part2(map.copy())
 }
 
-fun part2(mapOrg: MatrixBool) {
-    var levels: MutableMap<Int, MatrixBool> = mutableMapOf()
-    levels[0] = mapOrg
-    repeat(200) {
-        val newLevels = mutableMapOf<Int, MatrixBool>()
-        val min = min(levels.keys.sorted())
-        val max = max(levels.keys.sorted())
-        var level = 0
-        do {
-            val newMap = step2(levels, level)
-            if (newMap.bugs() > 0) {
-                newLevels[level] = newMap
-            } else {
-                if (level > max) {
-                    break
-                }
-            }
-            level++
-        } while (true)
-        level = -1
-        do {
-            val newMap = step2(levels, level)
-            if (newMap.bugs() > 0) {
-                newLevels[level] = newMap
-            } else {
-                if (level < min) {
-                    break
-                }
-            }
-            level--
-        } while (true)
-        levels = newLevels
-    }
-    println("Part2: ${count(levels)}")
-}
-
 fun part1(mapOrg: MatrixBool) {
     val set = mutableSetOf<String>()
     var map = mapOrg
@@ -76,6 +40,24 @@ fun part1(mapOrg: MatrixBool) {
         set.add(hash)
         i++
     }
+}
+
+fun part2(map: MatrixBool) {
+    var levels: MutableMap<Int, MatrixBool> = mutableMapOf()
+    levels[0] = map
+    repeat(200) {
+        val newLevels = mutableMapOf<Int, MatrixBool>()
+        val min = min(levels.keys)
+        val max = max(levels.keys)
+        (min-1..max+1).forEach {level ->
+            val newMap = step2(levels, level)
+            if (newMap.bugs() > 0) {
+                newLevels[level] = newMap
+            }
+        }
+        levels = newLevels
+    }
+    println("Part2: ${count(levels)}")
 }
 
 fun MatrixBool.hash(): String {
