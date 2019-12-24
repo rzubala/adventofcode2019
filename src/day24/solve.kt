@@ -22,10 +22,9 @@ fun main() {
         }.toMutableList())
     }
 
-    map.print()
-    println("Go")
-    //part1(map)
-
+    //map.print()
+    //println("Go")
+    part1(map.copy())
     part2(map.copy())
 }
 
@@ -39,7 +38,7 @@ fun part2(mapOrg: MatrixBool) {
         val min = min(levels.keys.sorted())
         val max = max(levels.keys.sorted())
 
-        println("\n***Iter: ${i+1} ($min $max)***")
+        //println("\n***Iter: ${i+1} ($min $max)***")
 
         var level = 0
         do {
@@ -73,11 +72,12 @@ fun part2(mapOrg: MatrixBool) {
             level--
         } while (true);
 
-        println("\n\n AFTER ${i+1} = ${count(newLevels)}")
+        //println("\n\n AFTER ${i+1} = ${count(newLevels)}")
         //print(newLevels)
 
         levels = newLevels
     }
+    println("Part2: ${count(levels)}")
 }
 
 fun part1(mapOrg: MatrixBool) {
@@ -89,8 +89,7 @@ fun part1(mapOrg: MatrixBool) {
         val hash = map.hash()
         if (set.contains(hash)) {
             val sum = map.count()
-            println("found $sum $hash")
-            map.print()
+            println("Part1: $sum")
             break
         }
         set.add(hash)
