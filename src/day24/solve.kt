@@ -2,12 +2,11 @@ package day24
 
 import utils.readInput
 import java.lang.IllegalStateException
-import java.lang.Math.pow
 import kotlin.math.pow
 
 typealias MatrixBool = MutableList<MutableList<Boolean>>
 fun main() {
-    var map: MatrixBool = mutableListOf()
+    val map: MatrixBool = mutableListOf()
     readInput("src/day24/input.data").forEach { line ->
         map.add(line.toCharArray().toList().map {
             when(it) {
@@ -18,11 +17,15 @@ fun main() {
         }.toMutableList())
     }
 
-    val set = mutableSetOf<String>()
     map.print()
+    part1(map)
+}
 
+fun part1(mapOrg: MatrixBool) {
+    val set = mutableSetOf<String>()
+    var map = mapOrg
     var i = 0
-    while(true) {
+    while (true) {
         map = map.step()
         val hash = map.hash()
         if (set.contains(hash)) {
