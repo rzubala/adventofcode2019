@@ -18,15 +18,18 @@ const val SECURITY = "== Security Checkpoint =="
 
 fun main() {
     val code = readInput("src/day25/input.data")[0].split(",").map { it.toLong() }
-    val forbidden = mutableListOf<String>("molten lava", "infinite loop", "escape pod", "photons", "giant electromagnet", "loom", "polygon", "manifold", "pointer")
+    val forbidden = mutableListOf<String>("molten lava", "infinite loop", "escape pod", "photons", "giant electromagnet")
     val path = mutableListOf<Direction>()
     val seen = mutableSetOf<Point>()
     val items = mutableListOf<String>()
+    val combinations = mutableListOf<String>()
+
     class Droid {
         var output: String = ""
         var command: Iterator<Long>? = null
         var position = Point(0, 0)
         var securityCommand = ""
+        var iter = 0
         fun start() {
             seen.add(position)
             IntCode(code.copy()).run(
@@ -44,8 +47,12 @@ fun main() {
                     var checkpoint = false
                     var printInv = ""
                     if (output.contains(SECURITY)) {
+                        if (combinations.isEmpty()) {
+                            buildCombinations(combinations, items)
+                        }
                         checkpoint = true
-                        printInv = "inv\n"
+                        printInv = combinations[iter++]
+                        printInv += "inv\n"
                         println("Item: ${items.toString()}")
                     }
                     output = ""
@@ -57,6 +64,7 @@ fun main() {
                     if (checkpoint) {
                         securityCommand = nextMove
                     }
+                    println("${printInv}${nextMove}")
                     command = toIntCode("${printInv}${nextMove}").iterator()
                     command!!.next()
                 }
@@ -65,6 +73,28 @@ fun main() {
                 print(out.toChar())
                 output += out.toChar().toString()
             }
+        }
+
+        private fun buildCombinations(combinations: MutableList<String>, list: MutableList<String>) {
+            val drop = dropAll(list)
+            for (i in (1..127)) {
+                var pos = 0
+                combinations.add(drop)
+                i.toString(2).split("").forEach{ n ->
+                    if (n.isNotEmpty()) {
+                        if (n == "1") {
+                            combinations.add("take ${list[pos]}\n")
+                        }
+                        pos++
+                    }
+                }
+            }
+        }
+
+        fun dropAll(list: List<String>): String {
+            var result = ""
+            list.forEach { result += "drop $it\n" }
+            return result
         }
 
         private fun getNextMove(data: Pair<MutableList<Direction>, String>): String {
