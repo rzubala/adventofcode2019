@@ -18,17 +18,15 @@ const val SECURITY = "== Security Checkpoint =="
 
 fun main() {
     val code = readInput("src/day25/input.data")[0].split(",").map { it.toLong() }
-    val forbidden = mutableListOf<String>("molten lava", "infinite loop", "escape pod", "photons", "giant electromagnet")
+    val forbidden = mutableListOf<String>("molten lava", "infinite loop", "escape pod", "photons", "giant electromagnet", "loom", "polygon", "manifold", "pointer")
     val path = mutableListOf<Direction>()
     val seen = mutableSetOf<Point>()
     val items = mutableListOf<String>()
-
     class Droid {
         var output: String = ""
         var command: Iterator<Long>? = null
         var position = Point(0, 0)
         var securityCommand = ""
-
         fun start() {
             seen.add(position)
             IntCode(code.copy()).run(
@@ -42,17 +40,14 @@ fun main() {
                 if (value > -1L) {
                     value
                 } else {
-                    println("NEW INPUT $position")
                     val data = parseDoors(output)
-
                     var checkpoint = false
                     var printInv = ""
                     if (output.contains(SECURITY)) {
-
-                        printInv = "drop loom\ndrop polygon\ndrop manifold\ndrop pointer\ninv\n"
                         checkpoint = true
+                        printInv = "inv\n"
+                        println("Item: ${items.toString()}")
                     }
-
                     output = ""
                     val nextMove = if (checkpoint && securityCommand.isNotEmpty()) {
                         securityCommand
@@ -62,7 +57,6 @@ fun main() {
                     if (checkpoint) {
                         securityCommand = nextMove
                     }
-                    println("next command: ${printInv}$nextMove")
                     command = toIntCode("${printInv}${nextMove}").iterator()
                     command!!.next()
                 }
