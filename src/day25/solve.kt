@@ -14,57 +14,20 @@ import java.lang.IllegalStateException
 
 const val DOORS = "Doors here lead:"
 const val ITEMS = "Items here:"
+const val SECURITY = "== Security Checkpoint =="
 
 fun main() {
     val code = readInput("src/day25/input.data")[0].split(",").map { it.toLong() }
-
-    //molten lava
-    //mutex
-    //mug
-    //polygon
-
-    val instructions = listOf(
-            "north\n",
-            //"take molten lava\n",
-            "south\n",
-            "south\n",
-            "take mutex\n",
-            "south\n",
-            "take manifold\n",
-            "west\n",
-            //"take infinite loop\n",
-            "west\n",
-            "take klein bottle\n",
-            "east\n",
-            "east\n",
-            "north\n",
-            "east\n",
-            "take manifold\n",
-            "east\n",
-            "take polygon\n",
-            "east\n",
-            "east\n",
-            //"take escape pod\n",
-            "east\n",
-            "take pointer\n",
-            "south\n",
-            "west\n",
-            "west\n"
-
-    )
-    val program = instructions.joinToString("")
-    val inputCode = toIntCode(program).iterator()
-
     val forbidden = mutableListOf<String>("molten lava", "infinite loop", "escape pod", "photons", "giant electromagnet")
     val path = mutableListOf<Direction>()
     val seen = mutableSetOf<Point>()
+    val items = mutableListOf<String>()
 
     class Droid {
         var output: String = ""
         var command: Iterator<Long>? = null
         var position = Point(0, 0)
         var securityCommand = ""
-        var lastCommand = "";
 
         fun start() {
             seen.add(position)
@@ -84,7 +47,8 @@ fun main() {
 
                     var checkpoint = false
                     var printInv = ""
-                    if (output.contains("== Security Checkpoint ==")) {
+                    if (output.contains(SECURITY)) {
+
                         printInv = "drop loom\ndrop polygon\ndrop manifold\ndrop pointer\ninv\n"
                         checkpoint = true
                     }
@@ -115,6 +79,7 @@ fun main() {
             println("Parsed item: $item")
             var itemCommand = ""
             if (item.isNotEmpty() && !forbidden.contains(item)) {
+                items.add(item)
                 itemCommand = "take $item\n"
             }
             when {
