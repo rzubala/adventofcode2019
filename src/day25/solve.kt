@@ -63,6 +63,8 @@ fun main() {
         var output: String = ""
         var command: Iterator<Long>? = null
         var position = Point(0, 0)
+        var securityCommand = ""
+        var lastCommand = "";
 
         fun start() {
             seen.add(position)
@@ -80,13 +82,22 @@ fun main() {
                     println("NEW INPUT $position")
                     val data = parseDoors(output)
 
+                    var checkpoint = false
                     var printInv = ""
                     if (output.contains("== Security Checkpoint ==")) {
                         printInv = "drop loom\ndrop polygon\ndrop manifold\ndrop pointer\ninv\n"
+                        checkpoint = true
                     }
 
                     output = ""
-                    val nextMove = getNextMove(data)
+                    val nextMove = if (checkpoint && securityCommand.isNotEmpty()) {
+                        securityCommand
+                    } else {
+                        getNextMove(data)
+                    }
+                    if (checkpoint) {
+                        securityCommand = nextMove
+                    }
                     println("next command: ${printInv}$nextMove")
                     command = toIntCode("${printInv}${nextMove}").iterator()
                     command!!.next()
@@ -110,7 +121,7 @@ fun main() {
                 directions.contains(Direction.NORTH) && !seen.contains(position.up())-> {
                     position = position.up()
                     path.add(Direction.NORTH)
-                    seen.add(position.copy())
+                       seen.add(position.copy())
                     return "${itemCommand}north\n"
                 }
                 directions.contains(Direction.SOUTH) && !seen.contains(position.down())-> {
