@@ -11,10 +11,12 @@ import utils.IntCode
 import utils.copy
 import utils.readInput
 import java.lang.IllegalStateException
+import kotlin.math.pow
 
 const val DOORS = "Doors here lead:"
 const val ITEMS = "Items here:"
 const val SECURITY = "== Security Checkpoint =="
+const val regexStr = "by typing (\\d+) on the keypad"
 
 fun main() {
     val code = readInput("src/day25/input.data")[0].split(",").map { it.toLong() }
@@ -30,6 +32,7 @@ fun main() {
         var position = Point(0, 0)
         var securityCommand = ""
         var iter = 0
+        var passwordFound = false
         fun start() {
             seen.add(position)
             IntCode(code.copy()).run(
@@ -53,7 +56,6 @@ fun main() {
                         checkpoint = true
                         printInv = combinations[iter++]
                         printInv += "inv\n"
-                        println("Item: ${items.toString()}")
                     }
                     output = ""
                     val nextMove = if (checkpoint && securityCommand.isNotEmpty()) {
@@ -64,20 +66,29 @@ fun main() {
                     if (checkpoint) {
                         securityCommand = nextMove
                     }
-                    println("${printInv}${nextMove}")
                     command = toIntCode("${printInv}${nextMove}").iterator()
                     command!!.next()
                 }
             })
             { out ->
-                print(out.toChar())
                 output += out.toChar().toString()
+                if (!passwordFound && securityCommand.isNotEmpty()) {
+                    parsePassword()
+                }
+            }
+        }
+        private fun parsePassword() {
+            val regex = regexStr.toRegex()
+            val matchResult = regex.find(output)
+            matchResult?.let {
+                println("Password ${matchResult.groupValues[1].toInt()}")
+                passwordFound = true
             }
         }
 
         private fun buildCombinations(combinations: MutableList<String>, list: MutableList<String>) {
             val drop = dropAll(list)
-            for (i in (1..127)) {
+            for (i in (1 until (2.0.pow(items.size)-1).toInt())) {
                 var pos = 0
                 combinations.add(drop)
                 i.toString(2).split("").forEach{ n ->
@@ -100,7 +111,6 @@ fun main() {
         private fun getNextMove(data: Pair<MutableList<Direction>, String>): String {
             val directions = data.first
             val item = data.second
-            println("Parsed item: $item")
             var itemCommand = ""
             if (item.isNotEmpty() && !forbidden.contains(item)) {
                 items.add(item)
@@ -133,7 +143,6 @@ fun main() {
                 }
             }
             if (path.isNotEmpty()) {
-                println("BACK")
                 return when(path.removeAt(path.size - 1)) {
                     Direction.NORTH -> {
                         position = position.down()
