@@ -31,8 +31,8 @@ fun main() {
         var command: Iterator<Long>? = null
         var position = Point(0, 0)
         var securityCommand = ""
-        var iter = 0
         var passwordFound = false
+        var iterator = combinations.iterator()
         fun start() {
             seen.add(position)
             IntCode(code.copy()).run(
@@ -52,9 +52,10 @@ fun main() {
                     if (output.contains(SECURITY)) {
                         if (combinations.isEmpty()) {
                             buildCombinations(combinations, items)
+                            iterator = combinations.iterator()
                         }
                         checkpoint = true
-                        printInv = combinations[iter++]
+                        printInv = if (iterator.hasNext()) iterator.next() else ""
                         printInv += "inv\n"
                     }
                     output = ""
@@ -88,19 +89,30 @@ fun main() {
 
         private fun buildCombinations(combinations: MutableList<String>, list: MutableList<String>) {
             val drop = dropAll(list)
+            combinations.add(drop)
+            var last = 0
             for (i in (1 until (2.0.pow(items.size)-1).toInt())) {
                 var pos = 0
-                combinations.add(drop)
-                i.toString(2).split("").forEach{ n ->
-                    if (n.isNotEmpty()) {
-                        if (n == "1") {
-                            combinations.add("take ${list[pos]}\n")
-                        }
-                        pos++
+                val lastItems = last.toString(2).toCharArray()
+                i.toString(2).toCharArray().forEach{ n ->
+                    val previous = getValue(lastItems, pos)
+                    if (!previous && n == '1') {
+                        combinations.add("take ${list[pos]}\n")
+                    } else if (previous && n == '0') {
+                        combinations.add("drop ${list[pos]}\n")
                     }
+                    pos++
                 }
+                last = i
             }
         }
+
+        private fun getValue(array: CharArray, i: Int): Boolean =
+            if (i >= array.size) {
+                false
+            } else {
+                array[i] == '1'
+            }
 
         fun dropAll(list: List<String>): String {
             var result = ""
